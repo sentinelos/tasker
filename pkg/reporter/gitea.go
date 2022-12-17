@@ -7,28 +7,28 @@ import (
 	"os"
 
 	"github.com/drone/go-scm/scm"
-	"github.com/drone/go-scm/scm/driver/github"
+	"github.com/drone/go-scm/scm/driver/gitea"
 	"github.com/drone/go-scm/scm/transport/oauth2"
 )
 
-// GitHub is a reporter that summarizes workflow statuses as GitHub statuses.
-type GitHub struct {
+// Gitea is a reporter that summarizes workflow statuses as Gitea statuses.
+type Gitea struct {
 	*GitReporter
 }
 
-// NewGitHubReporter returns a reporter that posts workflow statuses as status checks on a pull request.
-func NewGitHubReporter(namespace, name, ref string) (*GitHub, error) {
-	uri, ok := os.LookupEnv("GITHUB_URI")
+// NewGiteaReporter returns a reporter that posts workflow statuses as status checks on a pull request.
+func NewGiteaReporter(namespace, name, ref string) (*Gitea, error) {
+	uri, ok := os.LookupEnv("GITEA_URI")
 	if !ok {
-		uri = "https://api.github.com"
+		return nil, errors.New("missing GITEA_URI")
 	}
 
-	token, ok := os.LookupEnv("GITHUB_TOKEN")
+	token, ok := os.LookupEnv("GITEA_TOKEN")
 	if !ok {
-		return nil, errors.New("missing GITHUB_TOKEN")
+		return nil, errors.New("missing GITEA_TOKEN")
 	}
 
-	client, err := github.New(uri)
+	client, err := gitea.New(uri)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func NewGitHubReporter(namespace, name, ref string) (*GitHub, error) {
 		},
 	}
 
-	return &GitHub{
+	return &Gitea{
 		GitReporter: &GitReporter{
 			Namespace: namespace,
 			Name:      name,
