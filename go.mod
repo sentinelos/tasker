@@ -1,4 +1,4 @@
-module github.com/sentinelos/ensurer
+module github.com/sentinelos/actions
 
 go 1.19
 

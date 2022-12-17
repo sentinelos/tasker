@@ -47,27 +47,27 @@ RUN --mount=type=cache,target=/go/src go mod verify
 COPY . .
 RUN --mount=type=cache,target=/go/src go list -mod=readonly all >/dev/null
 
-# builds ensurer-linux-amd64
-FROM base AS ensurer-linux-amd64-build
+# builds actions-linux-amd64
+FROM base AS actions-linux-amd64-build
 COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/ensurer/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/actions/pkg/version"
 ARG SHA
 ARG TAG
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=amd64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=ensurer -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /ensurer-linux-amd64
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=amd64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=actions -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /actions-linux-amd64
 
-# builds ensurer-linux-arm64
-FROM base AS ensurer-linux-arm64-build
+# builds actions-linux-arm64
+FROM base AS actions-linux-arm64-build
 COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/ensurer/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/actions/pkg/version"
 ARG SHA
 ARG TAG
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=arm64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=ensurer -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /ensurer-linux-arm64
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=arm64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=actions -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /actions-linux-arm64
 
 # runs gofumpt
 FROM base AS lint-gofumpt
@@ -75,7 +75,7 @@ RUN FILES="$(gofumpt -l .)" && test -z "${FILES}" || (echo -e "Source code is no
 
 # runs goimports
 FROM base AS lint-goimports
-RUN FILES="$(goimports -l -local github.com/sentinelos/ensurer .)" && test -z "${FILES}" || (echo -e "Source code is not formatted with 'goimports -w -local github.com/sentinelos/ensurer .':\n${FILES}"; exit 1)
+RUN FILES="$(goimports -l -local github.com/sentinelos/actions .)" && test -z "${FILES}" || (echo -e "Source code is not formatted with 'goimports -w -local github.com/sentinelos/actions .':\n${FILES}"; exit 1)
 
 # runs golangci-lint
 FROM base AS lint-golangci-lint
@@ -97,33 +97,33 @@ FROM base AS unit-tests-run
 ARG TESTPKGS
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src --mount=type=cache,target=/tmp go test -v -covermode=atomic -coverprofile=coverage.txt -coverpkg=${TESTPKGS} -count 1 ${TESTPKGS}
 
-FROM scratch AS ensurer-linux-amd64
-COPY --from=ensurer-linux-amd64-build /ensurer-linux-amd64 /ensurer-linux-amd64
+FROM scratch AS actions-linux-amd64
+COPY --from=actions-linux-amd64-build /actions-linux-amd64 /actions-linux-amd64
 
-FROM scratch AS ensurer-linux-arm64
-COPY --from=ensurer-linux-arm64-build /ensurer-linux-arm64 /ensurer-linux-arm64
+FROM scratch AS actions-linux-arm64
+COPY --from=actions-linux-arm64-build /actions-linux-arm64 /actions-linux-arm64
 
 FROM scratch AS unit-tests
 COPY --from=unit-tests-run /src/coverage.txt /coverage.txt
 
-FROM ensurer-${TARGETOS}-${TARGETARCH} AS ensurer
+FROM actions-${TARGETOS}-${TARGETARCH} AS actions
 
-FROM scratch AS ensurer-all
-COPY --from=ensurer-linux-amd64 / /
-COPY --from=ensurer-linux-arm64 / /
+FROM scratch AS actions-all
+COPY --from=actions-linux-amd64 / /
+COPY --from=actions-linux-arm64 / /
 
-FROM scratch AS ensurer-image
+FROM scratch AS actions-image
 ARG TARGETOS
 ARG TARGETARCH
 COPY --from=fhs / /
 COPY --from=certificates / /
-COPY --from=ensurer ensurer-${TARGETOS}-${TARGETARCH} /usr/bin/ensurer
+COPY --from=actions actions-${TARGETOS}-${TARGETARCH} /usr/bin/actions
 
-LABEL org.opencontainers.image.title="Ensurer"
-LABEL org.opencontainers.image.description="Ensurer is a tool for enforcing policies on your pipelines. "
+LABEL org.opencontainers.image.title="Actions"
+LABEL org.opencontainers.image.description="Actions is a tool for enforcing policies on your pipelines. "
 LABEL org.opencontainers.image.licenses="MPL-2.0"
 LABEL org.opencontainers.image.authors="Sentinel OS Authors"
-LABEL org.opencontainers.image.documentation="https://github.com/sentinelos/ensurer/blob/main/README.md"
-LABEL org.opencontainers.image.source="https://github.com/sentinelos/ensurer"
+LABEL org.opencontainers.image.documentation="https://github.com/sentinelos/actions/blob/main/README.md"
+LABEL org.opencontainers.image.source="https://github.com/sentinelos/actions"
 
-ENTRYPOINT ["/usr/bin/ensurer"]
+ENTRYPOINT ["/usr/bin/actions"]

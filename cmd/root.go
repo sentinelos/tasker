@@ -6,13 +6,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/sentinelos/ensurer/pkg/constants"
+	"github.com/sentinelos/actions/pkg/constants"
 )
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   constants.AppName,
-	Short: "Ensurer is a tool for enforcing policies on your pipelines.",
+	Short: "Actions is a tool for enforcing policies on your pipelines.",
 	Long:  ``,
 }
 

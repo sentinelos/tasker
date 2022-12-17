@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/sentinelos/ensurer/pkg/version"
+	"github.com/sentinelos/actions/pkg/version"
 )
 
 var shortVersion bool

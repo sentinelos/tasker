@@ -1,8 +1,8 @@
-// main is the entrypoint for ensurer.
+// main is the entrypoint for actions.
 package main
 
 import (
-	"github.com/sentinelos/ensurer/cmd"
+	"github.com/sentinelos/actions/cmd"
 )
 
 func main() {

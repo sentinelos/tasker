@@ -2,13 +2,13 @@
 package types
 
 import (
-	"github.com/sentinelos/ensurer/pkg/reporter"
+	"github.com/sentinelos/actions/pkg/reporter"
 )
 
-// Ensurer is a struct that ensurer.yaml gets decoded into.
+// Actions is a struct that actions.yaml gets decoded into.
 //
 //nolint:govet
-type Ensurer struct {
+type Actions struct {
 	Policies []*PolicyDeclaration `yaml:"policies"`
 	reporter reporter.Reporter
 }

@@ -3,5 +3,5 @@ package constants
 
 const (
 	// AppName is the application name.
-	AppName = "ensurer"
+	AppName = "actions"
 )

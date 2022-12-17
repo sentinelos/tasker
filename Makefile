@@ -7,7 +7,7 @@ WITH_RACE ?= false
 REGISTRY ?= ghcr.io
 VENDOR ?= sentinelos
 REGISTRY_AND_VENDOR ?= $(REGISTRY)/$(VENDOR)
-IMAGE ?= ensurer
+IMAGE ?= actions
 GOLANGCILINT_VERSION ?= v1.50.1
 GOFUMPT_VERSION ?= v0.4.0
 GO_VERSION ?= $(shell grep -m 1 go go.mod | cut -d\  -f2)
@@ -75,7 +75,7 @@ else
 GO_LDFLAGS += -s -w
 endif
 
-all: unit-tests lint ensurer ensurer-image
+all: unit-tests lint actions actions-image
 
 %-local: ## Builds the specified target. The build result will be output to the specified local destination.
 	@$(MAKE) $*-target TARGET_ARGS="--output=type=local,dest=$(ARTIFACTS) $(TARGET_ARGS)"
@@ -99,7 +99,7 @@ fmt:  ## Formats the source code
 		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION) && \
 		go install golang.org/x/tools/cmd/goimports@$(GOIMPORTS_VERSION) && \
 		gofumpt -w . && \
-        goimports -w -local github.com/sentinelos/ensurer ."
+        goimports -w -local github.com/sentinelos/actions ."
 
 lint-govulncheck:  ## Runs govulncheck linter.
 	@$(MAKE) $@-target
@@ -123,16 +123,16 @@ unit-tests-race:  ## Performs unit tests with race detection enabled.
 coverage:  ## Upload coverage data to codecov.io.
 	bash -c "bash <(curl -s https://codecov.io/bash) -f $(ARTIFACTS)/coverage.txt -X fix"
 
-.PHONY: ensurer-linux-amd64
-ensurer-linux-amd64:  ## Builds executables for ensurer platform linux/amd64.
-	@$(MAKE) ensurer-linux-amd64-local PLATFORM_ARGS="--platform=linux/amd64"
+.PHONY: actions-linux-amd64
+actions-linux-amd64:  ## Builds executables for actions platform linux/amd64.
+	@$(MAKE) actions-linux-amd64-local PLATFORM_ARGS="--platform=linux/amd64"
 
-.PHONY: ensurer-linux-arm64
-ensurer-linux-arm64:  ## Builds executables for ensurer platform linux/arm64.
-	@$(MAKE) ensurer-linux-arm64-local PLATFORM_ARGS="--platform=linux/arm64"
+.PHONY: actions-linux-arm64
+actions-linux-arm64:  ## Builds executables for actions platform linux/arm64.
+	@$(MAKE) actions-linux-arm64-local PLATFORM_ARGS="--platform=linux/arm64"
 
-.PHONY: ensurer
-ensurer: ensurer-linux-amd64 ensurer-linux-arm64  ## Builds executables for ensurer.
+.PHONY: actions
+actions: actions-linux-amd64 actions-linux-arm64  ## Builds executables for actions.
 
 .PHONY: lint-markdown
 lint-markdown:  ## Runs markdownlint.
@@ -141,8 +141,8 @@ lint-markdown:  ## Runs markdownlint.
 .PHONY: lint
 lint: lint-golangci-lint lint-gofumpt lint-govulncheck lint-goimports lint-markdown  ## Run all linters for the project.
 
-.PHONY: ensurer-image
-ensurer-image:  ## Builds image for ensurer.
+.PHONY: actions-image
+actions-image:  ## Builds image for actions.
 	@$(MAKE) $@-image PLATFORM_ARGS="--platform=$(PLATFORM)"
 
 .PHONY: clean

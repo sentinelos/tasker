@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"text/template"
 
-	"github.com/sentinelos/ensurer/pkg/constants"
+	"github.com/sentinelos/actions/pkg/constants"
 )
 
 var (
