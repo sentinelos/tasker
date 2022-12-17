@@ -1,6 +1,6 @@
-# Ensuser 👋
+# Actions 👋
 
-**Ensuser** is a tool for enforcing policies on your pipelines.
+**Actions** is a tool for enforcing policies on your pipelines.
 
 ## License
 
