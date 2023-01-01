@@ -39,11 +39,11 @@ func decodeNotifyBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notify, hcl.Dia
 	for _, blk := range content.Blocks.OfType("output") {
 		output, outputDiags := decodeOutputBlock(blk, ctx)
 		if outputDiags.HasErrors() {
-			return nil, diags.Extend(outputDiags)
+			return notify, diags.Extend(outputDiags)
 		}
 
 		if _, found := notify.Outputs[output.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return notify, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate output",
 				Detail:   "Duplicate " + output.Name + " output definition found.",

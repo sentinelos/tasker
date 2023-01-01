@@ -61,6 +61,12 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 		diags hcl.Diagnostics
 	)
 
+	workflow := &Workflow{
+		Filename: filename,
+		Notifies: map[string]*Notify{},
+		Jobs:     map[string]*Job{},
+	}
+
 	parser := hclparse.NewParser()
 	switch suffix := strings.ToLower(filepath.Ext(filename)); suffix {
 	case ".wf":
@@ -73,13 +79,7 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 			Summary:  "Unsupported workflow file format",
 			Detail:   fmt.Sprintf("Cannot read from %s: unrecognized file format suffix %q.", filename, suffix),
 		})
-		return nil, diags
-	}
-
-	workflow := &Workflow{
-		Filename: filename,
-		Notifies: map[string]*Notify{},
-		Jobs:     map[string]*Job{},
+		return workflow, diags
 	}
 
 	content, contentDiags := file.Body.Content(&hcl.BodySchema{
@@ -100,11 +100,11 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 	for _, block := range content.Blocks.OfType("variable") {
 		variable, varDiags := decodeVariableBlock(block, nil)
 		if varDiags.HasErrors() {
-			return nil, diags.Extend(varDiags)
+			return workflow, diags.Extend(varDiags)
 		}
 
 		if _, found := variables[variable.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return workflow, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate variable",
 				Detail:   "Duplicate " + variable.Name + " variable definition found.",
@@ -130,11 +130,11 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 	for _, block := range content.Blocks.OfType("notify") {
 		notify, notifyDiags := decodeNotifyBlock(block, ctx)
 		if notifyDiags.HasErrors() {
-			return nil, diags.Extend(notifyDiags)
+			return workflow, diags.Extend(notifyDiags)
 		}
 
 		if _, found := workflow.Notifies[notify.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return workflow, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate notify",
 				Detail:   "Duplicate " + notify.Name + " notify definition found.",
@@ -149,11 +149,11 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 	for _, block := range content.Blocks.OfType("job") {
 		job, jobDiags := decodeJobBlock(block, ctx)
 		if jobDiags.HasErrors() {
-			return nil, diags.Extend(jobDiags)
+			return workflow, diags.Extend(jobDiags)
 		}
 
 		if _, found := workflow.Jobs[job.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return workflow, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate job",
 				Detail:   "Duplicate " + job.Name + " job definition found.",

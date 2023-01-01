@@ -52,11 +52,11 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("trigger") {
 		trigger, triggerDiags := decodeTriggerBlock(blk, ctx)
 		if triggerDiags.HasErrors() {
-			return nil, diags.Extend(triggerDiags)
+			return job, diags.Extend(triggerDiags)
 		}
 
 		if _, found := job.Trigger[trigger.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return job, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate trigger",
 				Detail:   "Duplicate " + trigger.Name + " trigger definition found.",
@@ -75,7 +75,7 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("use") {
 		use, useDiags := decodeUseBlock(blk, ctx)
 		if useDiags.HasErrors() {
-			return nil, diags.Extend(useDiags)
+			return job, diags.Extend(useDiags)
 		}
 
 		job.Uses = use
@@ -84,7 +84,7 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("container") {
 		container, containerDiags := decodeContainerBlock(blk, ctx)
 		if containerDiags.HasErrors() {
-			return nil, diags.Extend(containerDiags)
+			return job, diags.Extend(containerDiags)
 		}
 
 		job.Container = container
@@ -93,11 +93,11 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("service") {
 		service, serviceDiags := decodeContainerBlock(blk, ctx)
 		if serviceDiags.HasErrors() {
-			return nil, diags.Extend(serviceDiags)
+			return job, diags.Extend(serviceDiags)
 		}
 
 		if _, found := job.Services[service.Image]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return job, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate service",
 				Detail:   "Duplicate " + service.Image + " service definition found.",
@@ -112,11 +112,11 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("step") {
 		step, stepDiags := decodeStepBlock(blk, ctx)
 		if stepDiags.HasErrors() {
-			return nil, diags.Extend(stepDiags)
+			return job, diags.Extend(stepDiags)
 		}
 
 		if _, found := job.Steps[step.Name]; found {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return job, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate step",
 				Detail:   "Duplicate " + step.Name + " step definition found.",

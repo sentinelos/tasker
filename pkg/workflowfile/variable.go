@@ -51,7 +51,7 @@ func decodeVariableBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Variable, hcl
 	if attr, exists := content.Attributes["type"]; exists {
 		vType, typeDiags := typeexpr.Type(attr.Expr)
 		if typeDiags.HasErrors() {
-			return nil, diags.Extend(typeDiags)
+			return variable, diags.Extend(typeDiags)
 		}
 
 		varType = vType
@@ -60,12 +60,12 @@ func decodeVariableBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Variable, hcl
 	if attr, exists := content.Attributes["default"]; exists {
 		srcVal, srcDiags := attr.Expr.Value(ctx)
 		if srcDiags.HasErrors() {
-			return nil, diags.Extend(srcDiags)
+			return variable, diags.Extend(srcDiags)
 		}
 
 		value, err := convert.Convert(srcVal, varType)
 		if err != nil {
-			return nil, diags.Append(&hcl.Diagnostic{
+			return variable, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Unsuitable value type",
 				Detail:   fmt.Sprintf("Unsuitable value: %s", err.Error()),
