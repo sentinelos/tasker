@@ -1,4 +1,4 @@
-// Package reporter provides check result reporting.
+// Package reporter provides jobs result reporting.
 package reporter
 
 import (
