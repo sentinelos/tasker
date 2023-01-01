@@ -57,10 +57,10 @@ func decodeStepBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Step, hcl.Diagnos
 	for _, blk := range content.Blocks.OfType("use") {
 		use, useDiags := decodeUseBlock(blk, ctx)
 		if useDiags.HasErrors() {
-			diags = diags.Extend(useDiags)
-		} else {
-			step.Uses = use
+			return nil, diags.Extend(useDiags)
 		}
+
+		step.Uses = use
 	}
 
 	if attr, exists := content.Attributes["shell"]; exists {

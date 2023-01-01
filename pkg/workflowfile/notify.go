@@ -39,20 +39,20 @@ func decodeNotifyBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notify, hcl.Dia
 	for _, blk := range content.Blocks.OfType("output") {
 		output, outputDiags := decodeOutputBlock(blk, ctx)
 		if outputDiags.HasErrors() {
-			diags = diags.Extend(outputDiags)
-		} else {
-			if _, found := notify.Outputs[output.Name]; found {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate output",
-					Detail:   "Duplicate " + output.Name + " output definition found.",
-					Subject:  &output.DeclRange,
-					Context:  blk.DefRange.Ptr(),
-				})
-			} else {
-				notify.Outputs[output.Name] = output
-			}
+			return nil, diags.Extend(outputDiags)
 		}
+
+		if _, found := notify.Outputs[output.Name]; found {
+			return nil, diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate output",
+				Detail:   "Duplicate " + output.Name + " output definition found.",
+				Subject:  &output.DeclRange,
+				Context:  blk.DefRange.Ptr(),
+			})
+		}
+
+		notify.Outputs[output.Name] = output
 	}
 
 	return notify, diags

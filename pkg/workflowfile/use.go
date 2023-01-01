@@ -39,20 +39,20 @@ func decodeUseBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Use, hcl.Diagnosti
 	for _, blk := range content.Blocks.OfType("input") {
 		input, inputDiags := decodeInputBlock(blk, ctx)
 		if inputDiags.HasErrors() {
-			diags = diags.Extend(inputDiags)
-		} else {
-			if _, found := use.Inputs[input.Name]; found {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate input",
-					Detail:   "Duplicate " + input.Name + " input definition found.",
-					Subject:  &input.DeclRange,
-					Context:  blk.DefRange.Ptr(),
-				})
-			} else {
-				use.Inputs[input.Name] = input
-			}
+			return nil, diags.Extend(inputDiags)
 		}
+
+		if _, found := use.Inputs[input.Name]; found {
+			return nil, diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate input",
+				Detail:   "Duplicate " + input.Name + " input definition found.",
+				Subject:  &input.DeclRange,
+				Context:  blk.DefRange.Ptr(),
+			})
+		}
+
+		use.Inputs[input.Name] = input
 	}
 
 	return use, diags

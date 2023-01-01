@@ -64,10 +64,10 @@ func decodeContainerBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Container, h
 	for _, blk := range content.Blocks.OfType("credential") {
 		credential, credentialDiags := decodeCredentialBlock(blk, ctx)
 		if credentialDiags.HasErrors() {
-			diags = diags.Extend(credentialDiags)
-		} else {
-			container.Credential = credential
+			return nil, diags.Extend(credentialDiags)
 		}
+
+		container.Credential = credential
 	}
 
 	return container, diags

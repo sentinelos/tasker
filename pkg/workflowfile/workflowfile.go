@@ -98,22 +98,22 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 
 	variables := map[string]cty.Value{}
 	for _, block := range content.Blocks.OfType("variable") {
-		variable, jobDiags := decodeVariableBlock(block, nil)
-		if jobDiags.HasErrors() {
-			diags = diags.Extend(jobDiags)
-		} else {
-			if _, found := variables[variable.Name]; found {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate variable",
-					Detail:   "Duplicate " + variable.Name + " variable definition found.",
-					Subject:  &variable.DeclRange,
-					Context:  block.DefRange.Ptr(),
-				})
-			} else {
-				variables[variable.Name] = variable.Value
-			}
+		variable, varDiags := decodeVariableBlock(block, nil)
+		if varDiags.HasErrors() {
+			return nil, diags.Extend(varDiags)
 		}
+
+		if _, found := variables[variable.Name]; found {
+			return nil, diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate variable",
+				Detail:   "Duplicate " + variable.Name + " variable definition found.",
+				Subject:  &variable.DeclRange,
+				Context:  block.DefRange.Ptr(),
+			})
+		}
+
+		variables[variable.Name] = variable.Value
 	}
 
 	context.AddVariables(variables)
@@ -130,39 +130,39 @@ func DecodeWorkflow(filename string, src []byte, context *Context) (*Workflow, h
 	for _, block := range content.Blocks.OfType("notify") {
 		notify, notifyDiags := decodeNotifyBlock(block, ctx)
 		if notifyDiags.HasErrors() {
-			diags = diags.Extend(notifyDiags)
-		} else {
-			if _, found := workflow.Notifies[notify.Name]; found {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate notify",
-					Detail:   "Duplicate " + notify.Name + " notify definition found.",
-					Subject:  &notify.DeclRange,
-					Context:  block.DefRange.Ptr(),
-				})
-			} else {
-				workflow.Notifies[notify.Name] = notify
-			}
+			return nil, diags.Extend(notifyDiags)
 		}
+
+		if _, found := workflow.Notifies[notify.Name]; found {
+			return nil, diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate notify",
+				Detail:   "Duplicate " + notify.Name + " notify definition found.",
+				Subject:  &notify.DeclRange,
+				Context:  block.DefRange.Ptr(),
+			})
+		}
+
+		workflow.Notifies[notify.Name] = notify
 	}
 
 	for _, block := range content.Blocks.OfType("job") {
 		job, jobDiags := decodeJobBlock(block, ctx)
 		if jobDiags.HasErrors() {
-			diags = diags.Extend(jobDiags)
-		} else {
-			if _, found := workflow.Jobs[job.Name]; found {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate job",
-					Detail:   "Duplicate " + job.Name + " job definition found.",
-					Subject:  &job.DeclRange,
-					Context:  block.DefRange.Ptr(),
-				})
-			} else {
-				workflow.Jobs[job.Name] = job
-			}
+			return nil, diags.Extend(jobDiags)
 		}
+
+		if _, found := workflow.Jobs[job.Name]; found {
+			return nil, diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate job",
+				Detail:   "Duplicate " + job.Name + " job definition found.",
+				Subject:  &job.DeclRange,
+				Context:  block.DefRange.Ptr(),
+			})
+		}
+
+		workflow.Jobs[job.Name] = job
 	}
 
 	return workflow, diags
