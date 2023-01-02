@@ -1,6 +1,6 @@
-# Actions 👋
+# Tasker 👋
 
-**Actions** is a tool for enforcing policies on your pipelines.
+**Tasker** is a task runner.
 
 ## License
 

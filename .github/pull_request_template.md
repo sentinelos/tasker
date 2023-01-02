@@ -1,6 +1,6 @@
 <!--
 
-Thanks for helping us to improve Actions!
+Thanks for helping us to improve Tasker!
 
 Make sure that we do not have any duplicates already open.
 You can ensure this by searching the PR list for this repository.
@@ -34,5 +34,5 @@ internal URL shortener to obfuscate links.
 - [ ] Test all functions
 - [ ] Documentation
 - [ ] Have enough logs to trace activities
-- [ ] Notify developers of necessary actions
+- [ ] Notify developers of necessary tasker
 

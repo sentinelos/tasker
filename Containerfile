@@ -47,27 +47,27 @@ RUN --mount=type=cache,target=/go/src go mod verify
 COPY . .
 RUN --mount=type=cache,target=/go/src go list -mod=readonly all >/dev/null
 
-# builds actions-linux-amd64
-FROM base AS actions-linux-amd64-build
+# builds tasker-linux-amd64
+FROM base AS tasker-linux-amd64-build
 COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/actions/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/tasker/pkg/version"
 ARG SHA
 ARG TAG
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=amd64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=actions -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /actions-linux-amd64
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=amd64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=tasker -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /tasker-linux-amd64
 
-# builds actions-linux-arm64
-FROM base AS actions-linux-arm64-build
+# builds tasker-linux-arm64
+FROM base AS tasker-linux-arm64-build
 COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/actions/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/tasker/pkg/version"
 ARG SHA
 ARG TAG
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=arm64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=actions -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /actions-linux-arm64
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=arm64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=tasker -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /tasker-linux-arm64
 
 # runs gofumpt
 FROM base AS lint-gofumpt
@@ -75,7 +75,7 @@ RUN FILES="$(gofumpt -l .)" && test -z "${FILES}" || (echo -e "Source code is no
 
 # runs goimports
 FROM base AS lint-goimports
-RUN FILES="$(goimports -l -local github.com/sentinelos/actions .)" && test -z "${FILES}" || (echo -e "Source code is not formatted with 'goimports -w -local github.com/sentinelos/actions .':\n${FILES}"; exit 1)
+RUN FILES="$(goimports -l -local github.com/sentinelos/tasker .)" && test -z "${FILES}" || (echo -e "Source code is not formatted with 'goimports -w -local github.com/sentinelos/tasker .':\n${FILES}"; exit 1)
 
 # runs golangci-lint
 FROM base AS lint-golangci-lint
@@ -97,33 +97,33 @@ FROM base AS unit-tests-run
 ARG TESTPKGS
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src --mount=type=cache,target=/tmp go test -v -covermode=atomic -coverprofile=coverage.txt -coverpkg=${TESTPKGS} -count 1 ${TESTPKGS}
 
-FROM scratch AS actions-linux-amd64
-COPY --from=actions-linux-amd64-build /actions-linux-amd64 /actions-linux-amd64
+FROM scratch AS tasker-linux-amd64
+COPY --from=tasker-linux-amd64-build /tasker-linux-amd64 /tasker-linux-amd64
 
-FROM scratch AS actions-linux-arm64
-COPY --from=actions-linux-arm64-build /actions-linux-arm64 /actions-linux-arm64
+FROM scratch AS tasker-linux-arm64
+COPY --from=tasker-linux-arm64-build /tasker-linux-arm64 /tasker-linux-arm64
 
 FROM scratch AS unit-tests
 COPY --from=unit-tests-run /src/coverage.txt /coverage.txt
 
-FROM actions-${TARGETOS}-${TARGETARCH} AS actions
+FROM tasker-${TARGETOS}-${TARGETARCH} AS tasker
 
-FROM scratch AS actions-all
-COPY --from=actions-linux-amd64 / /
-COPY --from=actions-linux-arm64 / /
+FROM scratch AS tasker-all
+COPY --from=tasker-linux-amd64 / /
+COPY --from=tasker-linux-arm64 / /
 
-FROM scratch AS actions-image
+FROM scratch AS tasker-image
 ARG TARGETOS
 ARG TARGETARCH
 COPY --from=fhs / /
 COPY --from=certificates / /
-COPY --from=actions actions-${TARGETOS}-${TARGETARCH} /usr/bin/actions
+COPY --from=tasker tasker-${TARGETOS}-${TARGETARCH} /usr/bin/tasker
 
-LABEL org.opencontainers.image.title="Actions"
-LABEL org.opencontainers.image.description="Actions is a tool for enforcing policies on your pipelines. "
+LABEL org.opencontainers.image.title="Tasker"
+LABEL org.opencontainers.image.description="Tasker is a tool for enforcing policies on your pipelines. "
 LABEL org.opencontainers.image.licenses="MPL-2.0"
 LABEL org.opencontainers.image.authors="Sentinel OS Authors"
-LABEL org.opencontainers.image.documentation="https://github.com/sentinelos/actions/blob/main/README.md"
-LABEL org.opencontainers.image.source="https://github.com/sentinelos/actions"
+LABEL org.opencontainers.image.documentation="https://github.com/sentinelos/tasker/blob/main/README.md"
+LABEL org.opencontainers.image.source="https://github.com/sentinelos/tasker"
 
-ENTRYPOINT ["/usr/bin/actions"]
+ENTRYPOINT ["/usr/bin/tasker"]

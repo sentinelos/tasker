@@ -1,4 +1,4 @@
-module github.com/sentinelos/actions
+module github.com/sentinelos/tasker
 
 go 1.19
 
@@ -8,7 +8,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/spf13/cobra v1.6.1
 	github.com/zclconf/go-cty v1.12.1
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

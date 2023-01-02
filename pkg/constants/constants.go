@@ -3,5 +3,5 @@ package constants
 
 const (
 	// AppName is the application name.
-	AppName = "actions"
+	AppName = "tasker"
 )

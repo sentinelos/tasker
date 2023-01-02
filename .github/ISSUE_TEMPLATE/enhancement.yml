@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Thanks for helping us to improve Actions!**
+        **Thanks for helping us to improve Tasker!**
 
         We welcome all enhancements reports. Please fill out each area of the form so we can better help you.
         If you are reporting, make sure that we do not have any duplicates already open.

@@ -1,8 +1,8 @@
-// main is the entrypoint for actions.
+// main is the entrypoint for tasker.
 package main
 
 import (
-	"github.com/sentinelos/actions/cmd"
+	"github.com/sentinelos/tasker/cmd"
 )
 
 func main() {
