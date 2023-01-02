@@ -1,4 +1,4 @@
-package workflowfile
+package taskfile
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func decodeStepBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Step, hcl.Diagnos
 			{Name: "on_failure"},
 			{Name: "shell"},
 			{Name: "workdir"},
-			{Name: "command", Required: true},
+			{Name: "run", Required: true},
 			{Name: "timeout"},
 		},
 		Blocks: []hcl.BlockHeaderSchema{
@@ -71,8 +71,8 @@ func decodeStepBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Step, hcl.Diagnos
 		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &step.Workdir))
 	}
 
-	if attr, exists := content.Attributes["command"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &step.Command))
+	if attr, exists := content.Attributes["run"]; exists {
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &step.Run))
 	}
 
 	if attr, exists := content.Attributes["timeout"]; exists {

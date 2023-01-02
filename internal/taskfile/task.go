@@ -1,4 +1,4 @@
-package workflowfile
+package taskfile
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-// decodeJobBlock validates each part of the job block, building out a defined *Job
-func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnostics) {
-	job := &Job{
+// decodeTaskBlock validates each part of the task block, building out a defined *Task
+func decodeTaskBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Task, hcl.Diagnostics) {
+	task := &Task{
 		Name:      block.Labels[0],
 		Trigger:   map[string]*Trigger{},
 		Uses:      &Use{},
@@ -36,27 +36,27 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 		},
 	})
 
-	if !hclsyntax.ValidIdentifier(job.Name) {
+	if !hclsyntax.ValidIdentifier(task.Name) {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Invalid job name",
+			Summary:  "Invalid task name",
 			Detail:   BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}
 
 	if attr, exists := content.Attributes["description"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &job.Description))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &task.Description))
 	}
 
 	for _, blk := range content.Blocks.OfType("trigger") {
 		trigger, triggerDiags := decodeTriggerBlock(blk, ctx)
 		if triggerDiags.HasErrors() {
-			return job, diags.Extend(triggerDiags)
+			return task, diags.Extend(triggerDiags)
 		}
 
-		if _, found := job.Trigger[trigger.Name]; found {
-			return job, diags.Append(&hcl.Diagnostic{
+		if _, found := task.Trigger[trigger.Name]; found {
+			return task, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate trigger",
 				Detail:   "Duplicate " + trigger.Name + " trigger definition found.",
@@ -65,39 +65,39 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 			})
 		}
 
-		job.Trigger[trigger.Name] = trigger
+		task.Trigger[trigger.Name] = trigger
 	}
 
 	if attr, exists := content.Attributes["depends_on"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &job.DependsOn))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &task.DependsOn))
 	}
 
 	for _, blk := range content.Blocks.OfType("use") {
 		use, useDiags := decodeUseBlock(blk, ctx)
 		if useDiags.HasErrors() {
-			return job, diags.Extend(useDiags)
+			return task, diags.Extend(useDiags)
 		}
 
-		job.Uses = use
+		task.Uses = use
 	}
 
 	for _, blk := range content.Blocks.OfType("container") {
 		container, containerDiags := decodeContainerBlock(blk, ctx)
 		if containerDiags.HasErrors() {
-			return job, diags.Extend(containerDiags)
+			return task, diags.Extend(containerDiags)
 		}
 
-		job.Container = container
+		task.Container = container
 	}
 
 	for _, blk := range content.Blocks.OfType("service") {
 		service, serviceDiags := decodeContainerBlock(blk, ctx)
 		if serviceDiags.HasErrors() {
-			return job, diags.Extend(serviceDiags)
+			return task, diags.Extend(serviceDiags)
 		}
 
-		if _, found := job.Services[service.Image]; found {
-			return job, diags.Append(&hcl.Diagnostic{
+		if _, found := task.Services[service.Image]; found {
+			return task, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate service",
 				Detail:   "Duplicate " + service.Image + " service definition found.",
@@ -106,17 +106,17 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 			})
 		}
 
-		job.Services[service.Image] = service
+		task.Services[service.Image] = service
 	}
 
 	for _, blk := range content.Blocks.OfType("step") {
 		step, stepDiags := decodeStepBlock(blk, ctx)
 		if stepDiags.HasErrors() {
-			return job, diags.Extend(stepDiags)
+			return task, diags.Extend(stepDiags)
 		}
 
-		if _, found := job.Steps[step.Name]; found {
-			return job, diags.Append(&hcl.Diagnostic{
+		if _, found := task.Steps[step.Name]; found {
+			return task, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate step",
 				Detail:   "Duplicate " + step.Name + " step definition found.",
@@ -125,7 +125,7 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 			})
 		}
 
-		job.Steps[step.Name] = step
+		task.Steps[step.Name] = step
 	}
 
 	if attr, exists := content.Attributes["timeout"]; exists {
@@ -144,12 +144,12 @@ func decodeJobBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Job, hcl.Diagnosti
 					Context:  attr.Expr.Range().Ptr(),
 				})
 
-				job.Timeout = DefaultTimeout
+				task.Timeout = DefaultTimeout
 			} else {
-				job.Timeout = d
+				task.Timeout = d
 			}
 		}
 	}
 
-	return job, diags
+	return task, diags
 }

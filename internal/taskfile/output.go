@@ -1,4 +1,4 @@
-package workflowfile
+package taskfile
 
 import (
 	"github.com/hashicorp/hcl/v2"

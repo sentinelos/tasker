@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/sentinelos/tasker/pkg/constants"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // rootCmd represents the base command when called without any subcommands.

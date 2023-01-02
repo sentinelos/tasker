@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/sentinelos/tasker/pkg/version"
+	"github.com/sentinelos/tasker/internal/version"
 )
 
 var shortVersion bool

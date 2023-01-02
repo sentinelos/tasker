@@ -1,8 +1,7 @@
-package workflowfile
+package taskfile
 
 import (
 	"os"
-	"path/filepath"
 	"runtime"
 	"time"
 
@@ -65,7 +64,7 @@ type Context struct {
 
 func NewContext() *Context {
 	id := uuid.New().String()
-	path, _ := os.Getwd()
+	workdir, _ := os.Getwd()
 
 	context := &Context{
 		Ctx: &hcl.EvalContext{
@@ -81,7 +80,7 @@ func NewContext() *Context {
 		Arch:    runtime.GOARCH,
 		User:    os.Getenv("USER"),
 		Shell:   os.Getenv("SHELL"),
-		Workdir: filepath.Join(path, id),
+		Workdir: workdir,
 	}, map[string]cty.Type{
 		"name":    cty.String,
 		"os":      cty.String,
@@ -139,7 +138,7 @@ type GitContext struct {
 	Reference  string `json:"reference" cty:"reference"`
 }
 
-type JobContext struct {
+type TaskContext struct {
 	Status     Status        `cty:"status"`
 	StartedAt  time.Duration `cty:"started_at"`
 	FinishedAt time.Duration `cty:"finished_at"`

@@ -53,7 +53,7 @@ COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/tasker/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/tasker/internal/version"
 ARG SHA
 ARG TAG
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=amd64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=tasker -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /tasker-linux-amd64
@@ -64,7 +64,7 @@ COPY --from=generate / /
 WORKDIR /src
 ARG GO_BUILDFLAGS
 ARG GO_LDFLAGS
-ARG VERSION_PKG="github.com/sentinelos/tasker/pkg/version"
+ARG VERSION_PKG="github.com/sentinelos/tasker/internal/version"
 ARG SHA
 ARG TAG
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/src GOARCH=arm64 GOOS=linux go build ${GO_BUILDFLAGS} -ldflags "${GO_LDFLAGS} -X ${VERSION_PKG}.Name=tasker -X ${VERSION_PKG}.SHA=${SHA} -X ${VERSION_PKG}.Tag=${TAG}" -o /tasker-linux-arm64
@@ -120,7 +120,7 @@ COPY --from=certificates / /
 COPY --from=tasker tasker-${TARGETOS}-${TARGETARCH} /usr/bin/tasker
 
 LABEL org.opencontainers.image.title="Tasker"
-LABEL org.opencontainers.image.description="Tasker is a tool for enforcing policies on your pipelines. "
+LABEL org.opencontainers.image.description="Tasker is a task runner."
 LABEL org.opencontainers.image.licenses="MPL-2.0"
 LABEL org.opencontainers.image.authors="Sentinel OS Authors"
 LABEL org.opencontainers.image.documentation="https://github.com/sentinelos/tasker/blob/main/README.md"

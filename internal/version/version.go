@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"text/template"
 
-	"github.com/sentinelos/tasker/pkg/constants"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 var (

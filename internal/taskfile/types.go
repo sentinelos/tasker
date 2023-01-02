@@ -1,4 +1,4 @@
-package workflowfile
+package taskfile
 
 import (
 	"time"
@@ -7,16 +7,18 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-// Workflow is the structure of the files in .workflows
-type Workflow struct {
-	Filename    string             `yaml:"filename"`
-	Name        string             `yaml:"name" hcl:"name"`
-	Description string             `yaml:"description" hcl:"description,optional"`
-	Notifies    map[string]*Notify `yaml:"notifies" hcl:"notify,block"`
-	Jobs        map[string]*Job    `yaml:"jobs" hcl:"job,block"`
+// Taskfile is the structure of the files in .taskfiles
+type Taskfile struct {
+	Filename    string                `yaml:"filename"`
+	Name        string                `yaml:"name" hcl:"name"`
+	Description string                `yaml:"description" hcl:"description,optional"`
+	RunsOn      string                `yaml:"runs_on" hcl:"runs_on"`
+	Notifies    map[string]*Notify    `yaml:"notifies" hcl:"notify,block"`
+	Services    map[string]*Container `yaml:"services" hcl:"service,block"`
+	Tasks       map[string]*Task      `yaml:"tasks" hcl:"task,block"`
 }
 
-type Job struct {
+type Task struct {
 	Name        string                `yaml:"name" hcl:"name"`
 	Description string                `yaml:"description" hcl:"description,optional"`
 	Trigger     map[string]*Trigger   `yaml:"trigger" hcl:"trigger,block"`
@@ -37,7 +39,7 @@ type Step struct {
 	Uses        *Use          `yaml:"uses" hcl:"use,block"`
 	Shell       string        `yaml:"shell" hcl:"shell,optional"`
 	Workdir     string        `yaml:"workdir" hcl:"workdir,optional"`
-	Command     string        `yaml:"command" hcl:"command"`
+	Run         []string      `yaml:"run" hcl:"run"`
 	Timeout     time.Duration `yaml:"timeout" hcl:"timeout,optional"`
 	DeclRange   hcl.Range     `yaml:"-"`
 }
@@ -87,7 +89,6 @@ type Output struct {
 	DeclRange   hcl.Range `yaml:"-"`
 }
 
-// Container is the specification of the container to use for the job
 type Container struct {
 	Image        string            `yaml:"image" hcl:"image"`
 	Description  string            `yaml:"description" hcl:"description,optional"`

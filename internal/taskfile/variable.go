@@ -1,4 +1,4 @@
-package workflowfile
+package taskfile
 
 import (
 	"fmt"
