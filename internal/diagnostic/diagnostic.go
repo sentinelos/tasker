@@ -12,21 +12,8 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
-var (
-	DefaultSeverity  = DiagInfo
-	DefaultTimeStamp = time.RFC3339
-)
-
-func NewDefaultDiagnostic() *Diagnostic {
-	return &Diagnostic{
-		Name:        "Default",
-		Description: "",
-		Severity:    DefaultSeverity,
-		Writers: []Writer{
-			NewConsoleWriter(),
-		},
-		Meta: HostMetadata(),
-	}
+func NewDiagnostic(o DiagnosticOptions) *Diagnostic {
+	return &Diagnostic{DiagnosticOptions: o}
 }
 
 func (d *Diagnostic) Trace(message string, fields ...Field) {
@@ -54,15 +41,17 @@ func (d *Diagnostic) Fatal(message string, fields ...Field) {
 }
 
 func (d *Diagnostic) Write(severity Severity, message string, fields ...Field) {
-	if d.Severity >= severity {
-		for _, writer := range d.Writers {
-			writer.WriteEntry(&Entry{
-				Severity: severity,
-				Message:  message,
-				Fields:   fields,
-				Time:     time.Now(),
-			})
-		}
+	if severity < d.Severity || len(d.Writers) == 0 {
+		return
+	}
+
+	for _, writer := range d.Writers {
+		writer.WriteEntry(&Entry{
+			Severity: severity,
+			Message:  message,
+			Fields:   fields,
+			Time:     time.Now(),
+		})
 	}
 }
 

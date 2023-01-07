@@ -1,7 +1,9 @@
 package diagnostic
 
 var (
-	_default = NewDefaultDiagnostic()
+	_default = NewDiagnostic(NewOptions(
+		WithName("Default"),
+	))
 )
 
 func Trace(message string, fields ...Field) {
