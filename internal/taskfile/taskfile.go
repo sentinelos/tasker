@@ -58,9 +58,9 @@ func LoadTaskfile(filename string, context *Context) (*Taskfile, hcl.Diagnostics
 
 	parser := hclparse.NewParser()
 	switch suffix := strings.ToLower(filepath.Ext(filename)); suffix {
-	case ".wf":
+	case ".tf":
 		file, diags = parser.ParseHCL(src, filename)
-	case ".wf.json":
+	case ".tf.json":
 		file, diags = parser.ParseJSON(src, filename)
 	default:
 		diags = diags.Append(&hcl.Diagnostic{
@@ -101,7 +101,6 @@ func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfil
 		Blocks: []hcl.BlockHeaderSchema{
 			{Type: "variable", LabelNames: []string{"name"}},
 			{Type: "notify", LabelNames: []string{"name"}},
-			{Type: "service", LabelNames: []string{"image"}},
 			{Type: "task", LabelNames: []string{"name"}},
 		},
 	})
@@ -160,25 +159,6 @@ func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfil
 		}
 
 		taskfile.Notifies[notify.Name] = notify
-	}
-
-	for _, blk := range content.Blocks.OfType("service") {
-		service, serviceDiags := decodeContainerBlock(blk, ctx)
-		if serviceDiags.HasErrors() {
-			return taskfile, diags.Extend(serviceDiags)
-		}
-
-		if _, found := taskfile.Services[service.Image]; found {
-			return taskfile, diags.Append(&hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Duplicate service",
-				Detail:   "Duplicate " + service.Image + " service definition found.",
-				Subject:  &service.DeclRange,
-				Context:  blk.DefRange.Ptr(),
-			})
-		}
-
-		taskfile.Services[service.Image] = service
 	}
 
 	for _, block := range content.Blocks.OfType("task") {

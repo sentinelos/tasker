@@ -2,6 +2,7 @@ package taskfile
 
 import (
 	"os"
+	"reflect"
 	"runtime"
 	"time"
 
@@ -81,13 +82,6 @@ func NewContext() *Context {
 		User:    os.Getenv("USER"),
 		Shell:   os.Getenv("SHELL"),
 		Workdir: workdir,
-	}, map[string]cty.Type{
-		"name":    cty.String,
-		"os":      cty.String,
-		"arch":    cty.String,
-		"user":    cty.String,
-		"shell":   cty.String,
-		"workdir": cty.String,
 	})
 
 	return context
@@ -112,53 +106,75 @@ func (c *Context) AddListVariable(varName string, v []string) {
 	c.AddVariable(varName, value)
 }
 
-func (c *Context) AddObjectVariable(varName string, v any, ty map[string]cty.Type) {
-	value, _ := gocty.ToCtyValue(v, cty.Object(ty))
-	c.AddVariable(varName, value)
+func (c *Context) AddObjectVariable(varName string, v any) {
+	out := make(map[string]string)
+
+	structure := reflect.ValueOf(v)
+	if structure.Kind() == reflect.Ptr {
+		structure = structure.Elem()
+	}
+
+	if structure.Kind() != reflect.Struct {
+		c.AddMapVariable(varName, out)
+		return
+	}
+
+	ty := structure.Type()
+	for i := 0; i < structure.NumField(); i++ {
+		if tag := ty.Field(i).Tag.Get("ctx"); tag != "" && structure.Field(i).Kind() == reflect.String {
+			out[tag] = structure.Field(i).String()
+		}
+	}
+
+	c.AddMapVariable(varName, out)
 }
 
 func (c *Context) AddVariables(v map[string]cty.Value) {
 	c.AddVariable("variable", cty.ObjectVal(v))
 }
 
+func (c *Context) AddRunner(v RunnerContext) {
+	c.AddObjectVariable("runner", v)
+}
+
 type RunnerContext struct {
-	Name    string `cty:"name"`
-	OS      string `cty:"os"`
-	Arch    string `cty:"arch"`
-	User    string `cty:"user"`
-	Shell   string `cty:"shell"`
-	Workdir string `cty:"workdir"`
+	Name    string `ctx:"name"`
+	OS      string `ctx:"os"`
+	Arch    string `ctx:"arch"`
+	User    string `ctx:"user"`
+	Shell   string `ctx:"shell"`
+	Workdir string `ctx:"workdir"`
 }
 
 type GitContext struct {
-	Event      string `json:"event" cty:"event"`
-	Actor      string `json:"actor" cty:"actor"`
-	Repository string `json:"repository" cty:"repository"`
-	Branch     string `json:"branch" cty:"branch"`
-	Reference  string `json:"reference" cty:"reference"`
+	Event      string `json:"event" ctx:"event"`
+	Actor      string `json:"actor" ctx:"actor"`
+	Repository string `json:"repository" ctx:"repository"`
+	Branch     string `json:"branch" ctx:"branch"`
+	Reference  string `json:"reference" ctx:"reference"`
 }
 
 type TaskContext struct {
-	Status     Status        `cty:"status"`
-	StartedAt  time.Duration `cty:"started_at"`
-	FinishedAt time.Duration `cty:"finished_at"`
+	Status     Status        `ctx:"status"`
+	StartedAt  time.Duration `ctx:"started_at"`
+	FinishedAt time.Duration `ctx:"finished_at"`
 	Container  struct {
-		ID      string          `cty:"id"`
-		Status  ContainerStatus `cty:"status"`
-		Network string          `cty:"network"`
-	} `cty:"container"`
+		ID      string          `ctx:"id"`
+		Status  ContainerStatus `ctx:"status"`
+		Network string          `ctx:"network"`
+	} `ctx:"container"`
 	Services map[string]struct {
-		ID      string          `cty:"id"`
-		Status  ContainerStatus `cty:"status"`
-		Network string          `cty:"network"`
-	} `cty:"services"`
+		ID      string          `ctx:"id"`
+		Status  ContainerStatus `ctx:"status"`
+		Network string          `ctx:"network"`
+	} `ctx:"services"`
 }
 
 type StepContext struct {
-	Status     Status            `cty:"status"`
-	Outputs    map[string]string `cty:"outputs"`
-	StartedAt  time.Duration     `cty:"started_at"`
-	FinishedAt time.Duration     `cty:"finished_at"`
+	Status     Status            `ctx:"status"`
+	Outputs    map[string]string `ctx:"outputs"`
+	StartedAt  time.Duration     `ctx:"started_at"`
+	FinishedAt time.Duration     `ctx:"finished_at"`
 }
 
 // String status to string

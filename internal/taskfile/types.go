@@ -9,13 +9,12 @@ import (
 
 // Taskfile is the structure of the files in .taskfiles
 type Taskfile struct {
-	Filename    string                `yaml:"filename"`
-	Name        string                `yaml:"name" hcl:"name"`
-	Description string                `yaml:"description" hcl:"description,optional"`
-	RunsOn      string                `yaml:"runs_on" hcl:"runs_on"`
-	Notifies    map[string]*Notify    `yaml:"notifies" hcl:"notify,block"`
-	Services    map[string]*Container `yaml:"services" hcl:"service,block"`
-	Tasks       map[string]*Task      `yaml:"tasks" hcl:"task,block"`
+	Filename    string             `yaml:"filename"`
+	Name        string             `yaml:"name" hcl:"name"`
+	Description string             `yaml:"description" hcl:"description,optional"`
+	RunsOn      string             `yaml:"runs_on" hcl:"runs_on"`
+	Notifies    map[string]*Notify `yaml:"notifies" hcl:"notify,block"`
+	Tasks       map[string]*Task   `yaml:"tasks" hcl:"task,block"`
 }
 
 type Task struct {
