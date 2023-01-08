@@ -1,4 +1,4 @@
-package diagnostic
+package logging
 
 import (
 	"errors"
@@ -9,32 +9,32 @@ import (
 type Severity uint
 
 const (
-	DiagInvalid Severity = iota
-	DiagTrace
-	DiagDebug
-	DiagInfo
-	DiagWarn
-	DiagError
-	DiagFatal
+	Invalid Severity = iota
+	Trace
+	Debug
+	Info
+	Warn
+	Error
+	Fatal
 )
 
 var (
 	SeverityNames = map[Severity]string{
-		DiagTrace: "trace",
-		DiagDebug: "debug",
-		DiagInfo:  "info",
-		DiagWarn:  "warn",
-		DiagError: "error",
-		DiagFatal: "fatal",
+		Trace: "trace",
+		Debug: "debug",
+		Info:  "info",
+		Warn:  "warn",
+		Error: "error",
+		Fatal: "fatal",
 	}
 
 	SeverityStrings = map[string]Severity{
-		"trace": DiagTrace,
-		"debug": DiagDebug,
-		"info":  DiagInfo,
-		"warn":  DiagWarn,
-		"error": DiagError,
-		"fatal": DiagFatal,
+		"trace": Trace,
+		"debug": Debug,
+		"info":  Info,
+		"warn":  Warn,
+		"error": Error,
+		"fatal": Fatal,
 	}
 
 	// ErrDiagInvalid is returned if the severity is invalid.
@@ -50,7 +50,7 @@ func (s Severity) String() string {
 func ParseSeverity(str string) (Severity, error) {
 	s, ok := SeverityStrings[strings.ToLower(str)]
 	if !ok {
-		return DiagInvalid, ErrDiagInvalid
+		return Invalid, ErrDiagInvalid
 	}
 
 	return s, nil

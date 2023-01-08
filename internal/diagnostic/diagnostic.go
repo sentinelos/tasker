@@ -2,85 +2,54 @@
 package diagnostic
 
 import (
-	"runtime"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/host"
-	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/sentinelos/tasker/internal/diagnostic/logging"
 )
 
 func NewDiagnostic(o DiagnosticOptions) *Diagnostic {
 	return &Diagnostic{DiagnosticOptions: o}
 }
 
-func (d *Diagnostic) Trace(message string, fields ...Field) {
-	d.Write(DiagTrace, message, fields...)
+func (d *Diagnostic) Trace(message string, labels ...logging.Label) {
+	d.writeLog(logging.Trace, message, labels...)
 }
 
-func (d *Diagnostic) Debug(message string, fields ...Field) {
-	d.Write(DiagDebug, message, fields...)
+func (d *Diagnostic) Debug(message string, labels ...logging.Label) {
+	d.writeLog(logging.Debug, message, labels...)
 }
 
-func (d *Diagnostic) Info(message string, fields ...Field) {
-	d.Write(DiagInfo, message, fields...)
+func (d *Diagnostic) Info(message string, labels ...logging.Label) {
+	d.writeLog(logging.Info, message, labels...)
 }
 
-func (d *Diagnostic) Warn(message string, fields ...Field) {
-	d.Write(DiagWarn, message, fields...)
+func (d *Diagnostic) Warn(message string, labels ...logging.Label) {
+	d.writeLog(logging.Warn, message, labels...)
 }
 
-func (d *Diagnostic) Error(message string, fields ...Field) {
-	d.Write(DiagError, message, fields...)
+func (d *Diagnostic) Error(message string, labels ...logging.Label) {
+	d.writeLog(logging.Error, message, labels...)
 }
 
-func (d *Diagnostic) Fatal(message string, fields ...Field) {
-	d.Write(DiagFatal, message, fields...)
+func (d *Diagnostic) Fatal(message string, labels ...logging.Label) {
+	d.writeLog(logging.Fatal, message, labels...)
 }
 
-func (d *Diagnostic) Write(severity Severity, message string, fields ...Field) {
-	if severity < d.Severity || len(d.Writers) == 0 {
+func (d *Diagnostic) Counter(name string, labels ...logging.Label) {
+
+}
+
+func (d *Diagnostic) writeLog(severity logging.Severity, message string, labels ...logging.Label) {
+	if severity < d.Severity || len(d.LogWriters) == 0 {
 		return
 	}
 
-	for _, writer := range d.Writers {
-		writer.WriteEntry(&Entry{
+	for _, writer := range d.LogWriters {
+		writer.Write(d.Name, &logging.Entry{
 			Severity: severity,
 			Message:  message,
-			Fields:   fields,
+			Labels:   labels,
 			Time:     time.Now(),
 		})
 	}
-}
-
-func HostMetadata() map[string]string {
-	meta := map[string]string{
-		"go_version": strings.Replace(runtime.Version(), "go", "", -1),
-	}
-
-	if cpuInfo, err := cpu.Info(); err == nil {
-		meta["cpu_total"] = strconv.Itoa(len(cpuInfo))
-		for _, logical := range cpuInfo {
-			if _, found := meta["cpu_"+logical.PhysicalID]; !found {
-				meta["cpu_"+logical.PhysicalID] = logical.ModelName
-			}
-		}
-	}
-
-	if hostInfo, err := host.Info(); err == nil {
-		meta["os"] = runtime.GOOS
-		meta["arch"] = runtime.GOARCH
-		meta["hostname"] = hostInfo.Hostname
-		meta["platform"] = hostInfo.Platform
-		meta["platform_version"] = hostInfo.PlatformVersion
-		meta["kernel_version"] = hostInfo.KernelVersion
-	}
-
-	if memInfo, err := mem.VirtualMemory(); err == nil {
-		meta["memory"] = strconv.Itoa(int(memInfo.Total))
-	}
-
-	return meta
 }

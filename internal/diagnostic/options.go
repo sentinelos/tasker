@@ -1,28 +1,26 @@
 package diagnostic
 
 import (
-	"time"
+	"regexp"
+
+	"github.com/sentinelos/tasker/internal/diagnostic/logging"
+	"github.com/sentinelos/tasker/internal/diagnostic/logging/writer"
+	"github.com/sentinelos/tasker/internal/diagnostic/logging/writer/console"
 )
 
 type Option func(o *DiagnosticOptions)
 
 var (
-	DefaultSeverity  = DiagInfo
-	DefaultTimeStamp = time.RFC3339
+	NameRegex = regexp.MustCompile(`^[a-zA-Z_.][a-zA-Z0-9_.]*$`)
 )
 
 func NewOptions(opt ...Option) DiagnosticOptions {
 	opts := DiagnosticOptions{
-		Severity: DefaultSeverity,
-		Writers: []Writer{
-			NewConsoleWriter(ConsoleWriterOptions{
-				ColorOutput:    true,
-				QuoteString:    true,
-				EndWithMessage: true,
-				TimeFormat:     DefaultTimeStamp,
-			}),
+		Severity: logging.DefaultSeverity,
+		LogWriters: []writer.Writer{
+			console.NewConsole(console.NewOptions()),
 		},
-		Meta: HostMetadata(),
+		Meta: hostMetadata(),
 	}
 
 	for _, o := range opt {
@@ -47,22 +45,22 @@ func WithDescription(description string) Option {
 }
 
 // WithSeverity set severity for the diagnostic
-func WithSeverity(severity Severity) Option {
+func WithSeverity(severity logging.Severity) Option {
 	return func(o *DiagnosticOptions) {
 		o.Severity = severity
 	}
 }
 
 // WithWriter set writer for the diagnostic
-func WithWriter(writer Writer) Option {
+func WithWriter(writer writer.Writer) Option {
 	return func(o *DiagnosticOptions) {
-		o.Writers = append(o.Writers, writer)
+		o.LogWriters = append(o.LogWriters, writer)
 	}
 }
 
 // WithWriters set writers for the diagnostic
-func WithWriters(writers []Writer) Option {
+func WithWriters(writers []writer.Writer) Option {
 	return func(o *DiagnosticOptions) {
-		o.Writers = append(o.Writers, writers...)
+		o.LogWriters = append(o.LogWriters, writers...)
 	}
 }
