@@ -1,7 +1,7 @@
 package console
 
 import (
-	"github.com/sentinelos/tasker/internal/diagnostic/logging"
+	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
 
 type Option func(o *ConsoleOptions)
@@ -10,7 +10,7 @@ func NewOptions(opt ...Option) ConsoleOptions {
 	opts := ConsoleOptions{
 		ColorOutput: true,
 		QuoteString: true,
-		TimeFormat:  logging.DefaultTimeStamp,
+		TimeFormat:  logger.DefaultTimeStamp,
 	}
 
 	for _, o := range opt {

@@ -1,5 +1,5 @@
-// Package logging implementation of diagnostic logs
-package logging
+// Package logger implementation of diagnostic logs
+package logger
 
 import (
 	"time"

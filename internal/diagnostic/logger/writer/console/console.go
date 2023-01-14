@@ -5,14 +5,14 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/sentinelos/tasker/internal/diagnostic/logging"
+	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
 
 func NewConsole(o ConsoleOptions) *Console {
 	return &Console{ConsoleOptions: o}
 }
 
-func (c *Console) Write(name string, entry *logging.Entry) {
+func (c *Console) Write(name string, entry *logger.Entry) {
 	var buf bytes.Buffer
 
 	buf.WriteString("[")
@@ -45,7 +45,7 @@ func (c *Console) Write(name string, entry *logging.Entry) {
 	buf.WriteString("\n")
 
 	writer := os.Stdout
-	if entry.Severity >= logging.Error {
+	if entry.Severity >= logger.Error {
 		writer = os.Stderr
 	}
 

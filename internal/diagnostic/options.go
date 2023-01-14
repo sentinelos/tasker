@@ -3,9 +3,10 @@ package diagnostic
 import (
 	"regexp"
 
-	"github.com/sentinelos/tasker/internal/diagnostic/logging"
-	"github.com/sentinelos/tasker/internal/diagnostic/logging/writer"
-	"github.com/sentinelos/tasker/internal/diagnostic/logging/writer/console"
+	"github.com/sentinelos/tasker/internal/diagnostic/logger"
+	"github.com/sentinelos/tasker/internal/diagnostic/logger/writer"
+	"github.com/sentinelos/tasker/internal/diagnostic/logger/writer/console"
+	"github.com/sentinelos/tasker/internal/diagnostic/metrics"
 )
 
 type Option func(o *DiagnosticOptions)
@@ -16,11 +17,12 @@ var (
 
 func NewOptions(opt ...Option) DiagnosticOptions {
 	opts := DiagnosticOptions{
-		Severity: logging.DefaultSeverity,
+		Severity: logger.DefaultSeverity,
 		LogWriters: []writer.Writer{
 			console.NewConsole(console.NewOptions()),
 		},
-		Meta: hostMetadata(),
+		Meta:       metadata(),
+		MetricsSet: metrics.NewSet(),
 	}
 
 	for _, o := range opt {
@@ -45,7 +47,7 @@ func WithDescription(description string) Option {
 }
 
 // WithSeverity set severity for the diagnostic
-func WithSeverity(severity logging.Severity) Option {
+func WithSeverity(severity logger.Severity) Option {
 	return func(o *DiagnosticOptions) {
 		o.Severity = severity
 	}
