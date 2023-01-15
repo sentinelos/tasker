@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"fmt"
-	"io"
 	"strings"
 )
 
@@ -51,8 +50,13 @@ func (s *Set) Metric(name, description string, metric Metric, isAux bool) Metric
 	}
 
 	index := strings.IndexByte(name, '{')
-	n := name[:index]
-	labels := name[index+1 : len(name)-1]
+	n := name
+	labels := ""
+
+	if index > 0 {
+		n = name[:index]
+		labels = name[index+1 : len(name)-1]
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -89,18 +93,4 @@ func (s *Set) Metric(name, description string, metric Metric, isAux bool) Metric
 	})
 
 	return metric
-}
-
-// WritePrometheus writes all the metrics from s to w in Prometheus format.
-func (s *Set) WritePrometheus(writer io.Writer) {
-	for _, metric := range s.Metrics {
-		fmt.Fprintf(writer, "# HELP %s %s\n", metric.Name, metric.Description)
-		fmt.Fprintf(writer, "# TYPE %s %s\n", metric.Name, metric.Type.String())
-
-		for label, met := range metric.Labels {
-			fmt.Fprintf(writer, "%s{%s} ", metric.Name, label)
-			met.Write(writer)
-			fmt.Fprintf(writer, "\n")
-		}
-	}
 }

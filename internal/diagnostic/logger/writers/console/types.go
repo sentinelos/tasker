@@ -2,10 +2,10 @@ package console
 
 // Console defines an entry console writer.
 type Console struct {
-	ConsoleOptions
+	Options
 }
 
-type ConsoleOptions struct {
+type Options struct {
 	// ColorOutput determines if used colorized output.
 	ColorOutput bool
 
@@ -16,4 +16,6 @@ type ConsoleOptions struct {
 	EndWithMessage bool
 
 	TimeFormat string
+
+	Tags map[string]string
 }

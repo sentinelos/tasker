@@ -31,7 +31,7 @@ func (c *Counter) Get() uint64 {
 	return atomic.LoadUint64(&c.v)
 }
 
-// Write writes Counter value to writer.
+// Write writes Counter value to writers.
 func (c *Counter) Write(writer io.Writer) {
 	fmt.Fprintf(writer, "%d", c.Get())
 }

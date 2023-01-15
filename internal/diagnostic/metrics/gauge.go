@@ -31,7 +31,7 @@ func (g *Gauge) Get() uint64 {
 	return atomic.LoadUint64(&g.v)
 }
 
-// Write writes c to writer.
+// Write writes c to writers.
 func (g *Gauge) Write(writer io.Writer) {
 	fmt.Fprintf(writer, "%d", g.Get())
 }

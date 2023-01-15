@@ -10,7 +10,7 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
-func metadata() map[string]string {
+func hostTags() map[string]string {
 	meta := map[string]string{
 		"go_version": strings.Replace(runtime.Version(), "go", "", -1),
 	}

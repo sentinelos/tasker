@@ -1,4 +1,4 @@
-// Package console implementation of diagnostic log writer to console
+// Package console implementation of diagnostic logger writer to console
 package console
 
 import (
@@ -8,18 +8,16 @@ import (
 	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
 
-func NewConsole(o ConsoleOptions) *Console {
-	return &Console{ConsoleOptions: o}
+func NewConsole(o Options) *Console {
+	return &Console{Options: o}
 }
 
-func (c *Console) Write(name string, entry *logger.Entry) {
+func (c *Console) Write(entry *logger.Entry) {
 	var buf bytes.Buffer
 
 	buf.WriteString("[")
 	buf.WriteString(entry.Time.Format(c.TimeFormat))
-	buf.WriteString("] [")
-	buf.WriteString(name)
-	buf.WriteString("] [")
+	buf.WriteString(" - ")
 	buf.WriteString(entry.Severity.String())
 	buf.WriteString("]")
 
@@ -27,6 +25,13 @@ func (c *Console) Write(name string, entry *logger.Entry) {
 		buf.WriteString(" \"")
 		buf.WriteString(entry.Message)
 		buf.WriteString("\"")
+	}
+
+	for tag, value := range c.Tags {
+		buf.WriteString(" ")
+		buf.WriteString(tag)
+		buf.WriteString("=")
+		buf.WriteString(value)
 	}
 
 	for _, field := range entry.Labels {

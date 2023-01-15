@@ -49,6 +49,6 @@ func Gauge(name, description string) *metrics.Gauge {
 	return diagnostic.Gauge(name, description)
 }
 
-func WritePrometheus(writer io.Writer) {
-	diagnostic.WritePrometheus(writer)
+func MetricsToPrometheusWriter(writer io.Writer) {
+	diagnostic.MetricsToWriter("prometheus", writer)
 }
