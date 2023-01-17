@@ -4,7 +4,6 @@ package prometheus
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/sentinelos/tasker/internal/diagnostic/metrics"
 )
@@ -14,22 +13,18 @@ func NewPrometheus(o Options) *Prometheus {
 }
 
 func (p *Prometheus) Write(writer io.Writer, set *metrics.Set) {
-	var tags []string
-	for tag, value := range p.Tags {
-		tags = append(tags, tag+"=\""+value+"\"")
-	}
+	tags := p.Tags.String()
 
 	for _, metric := range set.Metrics {
 		fmt.Fprintf(writer, "# HELP %s %s\n", metric.Name, metric.Description)
 		fmt.Fprintf(writer, "# TYPE %s %s\n", metric.Name, metric.Type.String())
 
-		for label, met := range metric.Labels {
-			labels := tags
+		for label, met := range metric.Labels.Values() {
 			if len(label) > 0 {
-				labels = append(labels, label)
+				fmt.Fprintf(writer, "%s{%s,%s} ", metric.Name, tags, label)
+			} else {
+				fmt.Fprintf(writer, "%s{%s} ", metric.Name, tags)
 			}
-
-			fmt.Fprintf(writer, "%s{%s} ", metric.Name, strings.Join(labels, ", "))
 			met.Write(writer)
 			fmt.Fprintf(writer, "\n")
 		}

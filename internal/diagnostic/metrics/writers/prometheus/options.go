@@ -1,5 +1,9 @@
 package prometheus
 
+import (
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
+)
+
 type Option func(o *Options)
 
 func NewOptions(opt ...Option) Options {
@@ -13,7 +17,7 @@ func NewOptions(opt ...Option) Options {
 }
 
 // WithTags set tags for the Prometheus writer
-func WithTags(tags map[string]string) Option {
+func WithTags(tags labels.Labels) Option {
 	return func(o *Options) {
 		o.Tags = tags
 	}

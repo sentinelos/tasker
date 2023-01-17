@@ -3,7 +3,7 @@ package diagnostic
 import (
 	"io"
 
-	"github.com/sentinelos/tasker/internal/diagnostic/logger"
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 	"github.com/sentinelos/tasker/internal/diagnostic/metrics"
 )
 
@@ -17,35 +17,59 @@ func init() {
 	))
 }
 
-func Trace(message string, fields ...logger.Label) {
-	diagnostic.Trace(message, fields...)
+func Trace(message string) {
+	diagnostic.Trace(message, labels.Labels{})
 }
 
-func Debug(message string, fields ...logger.Label) {
-	diagnostic.Debug(message, fields...)
+func TraceWithLabels(message string, labels labels.Labels) {
+	diagnostic.Trace(message, labels)
 }
 
-func Info(message string, fields ...logger.Label) {
-	diagnostic.Info(message, fields...)
+func Debug(message string) {
+	diagnostic.Debug(message, labels.Labels{})
 }
 
-func Warn(message string, fields ...logger.Label) {
-	diagnostic.Warn(message, fields...)
+func DebugWithLabels(message string, labels labels.Labels) {
+	diagnostic.Debug(message, labels)
 }
 
-func Error(message string, fields ...logger.Label) {
-	diagnostic.Error(message, fields...)
+func Info(message string) {
+	diagnostic.Info(message, labels.Labels{})
 }
 
-func Fatal(message string, fields ...logger.Label) {
-	diagnostic.Fatal(message, fields...)
+func InfoWithLabels(message string, labels labels.Labels) {
+	diagnostic.Info(message, labels)
 }
 
-func Counter(name, description string) *metrics.Counter {
+func Warn(message string) {
+	diagnostic.Warn(message, labels.Labels{})
+}
+
+func WarnWithLabels(message string, labels labels.Labels) {
+	diagnostic.Warn(message, labels)
+}
+
+func Error(message string) {
+	diagnostic.Error(message, labels.Labels{})
+}
+
+func ErrorWithLabels(message string, labels labels.Labels) {
+	diagnostic.Error(message, labels)
+}
+
+func Fatal(message string) {
+	diagnostic.Fatal(message, labels.Labels{})
+}
+
+func FatalWithLabels(message string, labels labels.Labels) {
+	diagnostic.Fatal(message, labels)
+}
+
+func Counter(name, description string) *metrics.CounterLabels {
 	return diagnostic.Counter(name, description)
 }
 
-func Gauge(name, description string) *metrics.Gauge {
+func Gauge(name, description string) *metrics.GaugeLabels {
 	return diagnostic.Gauge(name, description)
 }
 

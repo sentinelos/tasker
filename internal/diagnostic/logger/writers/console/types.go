@@ -1,5 +1,9 @@
 package console
 
+import (
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
+)
+
 // Console defines an entry console writer.
 type Console struct {
 	Options
@@ -17,5 +21,5 @@ type Options struct {
 
 	TimeFormat string
 
-	Tags map[string]string
+	Tags labels.Labels
 }

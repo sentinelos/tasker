@@ -1,6 +1,7 @@
 package console
 
 import (
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
 
@@ -49,7 +50,7 @@ func WithTimeFormat(timeFormat string) Option {
 }
 
 // WithTags set tags for the Prometheus writer
-func WithTags(tags map[string]string) Option {
+func WithTags(tags labels.Labels) Option {
 	return func(o *Options) {
 		o.Tags = tags
 	}

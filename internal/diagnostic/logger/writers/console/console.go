@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
 
@@ -16,7 +17,7 @@ func (c *Console) Write(entry *logger.Entry) {
 	var buf bytes.Buffer
 
 	buf.WriteString("[")
-	buf.WriteString(entry.Time.Format(c.TimeFormat))
+	buf.WriteString(entry.Stamp.Format(c.TimeFormat))
 	buf.WriteString(" - ")
 	buf.WriteString(entry.Severity.String())
 	buf.WriteString("]")
@@ -27,19 +28,9 @@ func (c *Console) Write(entry *logger.Entry) {
 		buf.WriteString("\"")
 	}
 
-	for tag, value := range c.Tags {
-		buf.WriteString(" ")
-		buf.WriteString(tag)
-		buf.WriteString("=")
-		buf.WriteString(value)
-	}
-
-	for _, field := range entry.Labels {
-		buf.WriteString(" ")
-		buf.WriteString(field.Name)
-		buf.WriteString("=")
-		buf.WriteString(field.Value)
-	}
+	buf.WriteString("{")
+	buf.WriteString(labels.Merge(c.Tags, entry.Labels).String())
+	buf.WriteString("}")
 
 	if c.EndWithMessage {
 		buf.WriteString(" \"")

@@ -1,6 +1,6 @@
 package metrics
 
-// Type represents the metric type.
+// Type represents the getOrCreate type.
 type Type uint
 
 const (

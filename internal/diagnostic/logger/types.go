@@ -2,19 +2,14 @@ package logger
 
 import (
 	"time"
+
+	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 )
 
 // Entry represents information to be presented to a user about a debug, info or etc. of application.
 type Entry struct {
-	Time     time.Time
+	Stamp    time.Time
 	Severity Severity
 	Message  string
-	Labels   []Label
-}
-
-type Label struct {
-	Name        string
-	Description string
-	Value       string
-	Sensitive   bool
+	Labels   labels.Labels
 }
