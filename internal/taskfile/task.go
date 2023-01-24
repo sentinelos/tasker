@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // decodeTaskBlock validates each part of the task block, building out a defined *Task
@@ -40,7 +41,7 @@ func decodeTaskBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Task, hcl.Diagnos
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid task name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}
@@ -139,12 +140,12 @@ func decodeTaskBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Task, hcl.Diagnos
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagWarning,
 					Summary:  "Invalid timeout",
-					Detail:   fmt.Sprintf("Invalid timeout '%s', using default of %s", timeout, DefaultTimeout),
+					Detail:   fmt.Sprintf("Invalid timeout '%s', using default of %s", timeout, constants.DefaultTimeout),
 					Subject:  attr.Expr.StartRange().Ptr(),
 					Context:  attr.Expr.Range().Ptr(),
 				})
 
-				task.Timeout = DefaultTimeout
+				task.Timeout = constants.DefaultTimeout
 			} else {
 				task.Timeout = d
 			}

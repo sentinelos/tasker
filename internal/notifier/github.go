@@ -1,4 +1,4 @@
-package reporter
+package notifier
 
 import (
 	"context"
@@ -11,13 +11,8 @@ import (
 	"github.com/drone/go-scm/scm/transport/oauth2"
 )
 
-// GitHub is a reporter that summarizes workflow statuses as GitHub statuses.
-type GitHub struct {
-	*GitReporter
-}
-
-// NewGitHubReporter returns a reporter that posts workflow statuses as status checks on a pull request.
-func NewGitHubReporter(namespace, name, ref string) (*GitHub, error) {
+// NewGitHubNotifier returns a notifier that posts task steps statuses as status checks on a pull request.
+func NewGitHubNotifier(namespace, name, ref string) (*GitHub, error) {
 	uri, ok := os.LookupEnv("GITHUB_URI")
 	if !ok {
 		uri = "https://api.github.com"
@@ -40,7 +35,7 @@ func NewGitHubReporter(namespace, name, ref string) (*GitHub, error) {
 	}
 
 	return &GitHub{
-		GitReporter: &GitReporter{
+		GitNotifier: &GitNotifier{
 			Namespace: namespace,
 			Name:      name,
 			Ref:       ref,

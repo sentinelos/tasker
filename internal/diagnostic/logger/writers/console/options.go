@@ -1,17 +1,15 @@
 package console
 
 import (
+	"github.com/sentinelos/tasker/internal/constants"
 	"github.com/sentinelos/tasker/internal/diagnostic/labels"
-	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 )
-
-type Option func(o *Options)
 
 func NewOptions(opt ...Option) Options {
 	opts := Options{
 		ColorOutput: true,
 		QuoteString: true,
-		TimeFormat:  logger.DefaultTimeStamp,
+		TimeFormat:  constants.DefaultLoggerTimeStamp,
 	}
 
 	for _, o := range opt {
@@ -49,9 +47,9 @@ func WithTimeFormat(timeFormat string) Option {
 	}
 }
 
-// WithTags set tags for the Prometheus writer
-func WithTags(tags labels.Labels) Option {
+// WithLabels set tags for the Prometheus writer
+func WithLabels(labels labels.Labels) Option {
 	return func(o *Options) {
-		o.Tags = tags
+		o.Labels = labels
 	}
 }

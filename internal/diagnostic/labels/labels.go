@@ -6,9 +6,6 @@ import (
 	"strings"
 )
 
-// Labels is a map of label:value. It implements Labels.
-type Labels map[string]string
-
 func (l Labels) Set(key, value string) {
 	l[key] = value
 }

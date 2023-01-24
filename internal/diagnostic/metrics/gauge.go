@@ -8,8 +8,6 @@ import (
 	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 )
 
-type GaugeLabels map[string]*Gauge
-
 // Increment increment Gauge value.
 func (g *Gauge) Increment() {
 	g.Add(1)

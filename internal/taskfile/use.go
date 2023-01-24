@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // decodeUseBlock validates each part of the use block, building out a defined *Use
@@ -27,7 +28,7 @@ func decodeUseBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Use, hcl.Diagnosti
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid use name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}

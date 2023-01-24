@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // decodeTriggerBlock validates each part of the trigger block, building out a defined *Trigger
@@ -24,7 +25,7 @@ func decodeTriggerBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Trigger, hcl.D
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid trigger name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}

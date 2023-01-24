@@ -1,7 +1,4 @@
-package reporter
-
-// Noop is a reporter that does nothing.
-type Noop struct{}
+package notifier
 
 // SetStatus is a noop func.
 func (n *Noop) SetStatus(state, policy, check, message string) error {

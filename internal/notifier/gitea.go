@@ -1,4 +1,4 @@
-package reporter
+package notifier
 
 import (
 	"context"
@@ -11,13 +11,8 @@ import (
 	"github.com/drone/go-scm/scm/transport/oauth2"
 )
 
-// Gitea is a reporter that summarizes workflow statuses as Gitea statuses.
-type Gitea struct {
-	*GitReporter
-}
-
-// NewGiteaReporter returns a reporter that posts workflow statuses as status checks on a pull request.
-func NewGiteaReporter(namespace, name, ref string) (*Gitea, error) {
+// NewGiteaNotifier returns a notifier that posts task steps statuses as status checks on a pull request.
+func NewGiteaNotifier(namespace, name, ref string) (*Gitea, error) {
 	uri, ok := os.LookupEnv("GITEA_URI")
 	if !ok {
 		return nil, errors.New("missing GITEA_URI")
@@ -40,7 +35,7 @@ func NewGiteaReporter(namespace, name, ref string) (*Gitea, error) {
 	}
 
 	return &Gitea{
-		GitReporter: &GitReporter{
+		GitNotifier: &GitNotifier{
 			Namespace: namespace,
 			Name:      name,
 			Ref:       ref,

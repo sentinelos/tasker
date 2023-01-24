@@ -29,7 +29,7 @@ func (c *Console) Write(entry *logger.Entry) {
 	}
 
 	buf.WriteString("{")
-	buf.WriteString(labels.Merge(c.Tags, entry.Labels).String())
+	buf.WriteString(labels.Merge(c.Labels, entry.Labels).String())
 	buf.WriteString("}")
 
 	if c.EndWithMessage {

@@ -4,11 +4,12 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
-// decodeNotifyBlock validates each part of the notify block, building out a defined *Notify
-func decodeNotifyBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notify, hcl.Diagnostics) {
-	notify := &Notify{
+// decodeNotifierBlock validates each part of the notifier block, building out a defined *Notifier
+func decodeNotifierBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notifier, hcl.Diagnostics) {
+	notifier := &Notifier{
 		Name:      block.Labels[0],
 		Outputs:   map[string]*Output{},
 		DeclRange: block.DefRange,
@@ -23,27 +24,27 @@ func decodeNotifyBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notify, hcl.Dia
 		},
 	})
 
-	if !hclsyntax.ValidIdentifier(notify.Name) {
+	if !hclsyntax.ValidIdentifier(notifier.Name) {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Invalid notify name",
-			Detail:   BadIdentifierDetail,
+			Summary:  "Invalid notifier name",
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}
 
 	if attr, exists := content.Attributes["description"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &notify.Description))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, ctx, &notifier.Description))
 	}
 
 	for _, blk := range content.Blocks.OfType("output") {
 		output, outputDiags := decodeOutputBlock(blk, ctx)
 		if outputDiags.HasErrors() {
-			return notify, diags.Extend(outputDiags)
+			return notifier, diags.Extend(outputDiags)
 		}
 
-		if _, found := notify.Outputs[output.Name]; found {
-			return notify, diags.Append(&hcl.Diagnostic{
+		if _, found := notifier.Outputs[output.Name]; found {
+			return notifier, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate output",
 				Detail:   "Duplicate " + output.Name + " output definition found.",
@@ -52,8 +53,8 @@ func decodeNotifyBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Notify, hcl.Dia
 			})
 		}
 
-		notify.Outputs[output.Name] = output
+		notifier.Outputs[output.Name] = output
 	}
 
-	return notify, diags
+	return notifier, diags
 }

@@ -5,10 +5,14 @@ import (
 )
 
 // Prometheus defines a Prometheus writer.
-type Prometheus struct {
-	Options
-}
+type (
+	Prometheus struct {
+		Options
+	}
 
-type Options struct {
-	Tags labels.Labels
-}
+	Options struct {
+		Labels labels.Labels
+	}
+
+	Option func(o *Options)
+)

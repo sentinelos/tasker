@@ -1,4 +1,4 @@
-package reporter
+package notifier
 
 import (
 	"context"
@@ -11,13 +11,8 @@ import (
 	"github.com/drone/go-scm/scm/transport/oauth2"
 )
 
-// Bitbucket is a reporter that summarizes workflow statuses as Bitbucket statuses.
-type Bitbucket struct {
-	*GitReporter
-}
-
-// NewBitbucketReporter returns a reporter that posts workflow statuses as status checks on a pull request.
-func NewBitbucketReporter(namespace, name, ref string) (*Bitbucket, error) {
+// NewBitbucketNotifier returns a notifier that posts task steps statuses as status checks on a pull request.
+func NewBitbucketNotifier(namespace, name, ref string) (*Bitbucket, error) {
 	uri, ok := os.LookupEnv("BITBUCKET_URI")
 	if !ok {
 		uri = "https://api.bitbucket.org"
@@ -40,7 +35,7 @@ func NewBitbucketReporter(namespace, name, ref string) (*Bitbucket, error) {
 	}
 
 	return &Bitbucket{
-		GitReporter: &GitReporter{
+		GitNotifier: &GitNotifier{
 			Namespace: namespace,
 			Name:      name,
 			Ref:       ref,

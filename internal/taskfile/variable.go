@@ -8,14 +8,10 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/typeexpr"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/gocty"
-)
-
-const (
-	// VarEnvPrefix Prefix for collecting variable values from environment variables
-	VarEnvPrefix = "WF_VAR_"
 )
 
 // decodeVariableBlock validates each part of the variable block, building out a defined *Variable
@@ -38,7 +34,7 @@ func decodeVariableBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Variable, hcl
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid variable name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}
@@ -76,7 +72,7 @@ func decodeVariableBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Variable, hcl
 
 		variable.Value = value
 	} else {
-		if envVar, err := gocty.ToCtyValue(os.Getenv(VarEnvPrefix+variable.Name), varType); err == nil {
+		if envVar, err := gocty.ToCtyValue(os.Getenv(constants.VarEnvPrefix+variable.Name), varType); err == nil {
 			variable.Value = envVar
 		}
 	}

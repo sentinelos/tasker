@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // decodeOutputBlock validates each part of the output block, building out a defined *Output
@@ -25,7 +26,7 @@ func decodeOutputBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Output, hcl.Dia
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid output name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}

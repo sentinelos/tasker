@@ -1,8 +1,5 @@
 package metrics
 
-// Type represents the getOrCreate type.
-type Type uint
-
 const (
 	TypeCounter Type = iota
 	TypeGauge

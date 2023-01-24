@@ -1,4 +1,4 @@
-package reporter
+package notifier
 
 import (
 	"context"
@@ -11,13 +11,8 @@ import (
 	"github.com/drone/go-scm/scm/transport/oauth2"
 )
 
-// GitLab is a reporter that summarizes workflow statuses as GitLab statuses.
-type GitLab struct {
-	*GitReporter
-}
-
-// NewGitLabReporter returns a reporter that posts workflow statuses as status checks on a pull request.
-func NewGitLabReporter(namespace, name, ref string) (*GitLab, error) {
+// NewGitLabNotifier returns a notifier that posts task steps statuses as status checks on a pull request.
+func NewGitLabNotifier(namespace, name, ref string) (*GitLab, error) {
 	uri, ok := os.LookupEnv("GITLAB_URI")
 	if !ok {
 		uri = "https://gitlab.com"
@@ -40,7 +35,7 @@ func NewGitLabReporter(namespace, name, ref string) (*GitLab, error) {
 	}
 
 	return &GitLab{
-		GitReporter: &GitReporter{
+		GitNotifier: &GitNotifier{
 			Namespace: namespace,
 			Name:      name,
 			Ref:       ref,

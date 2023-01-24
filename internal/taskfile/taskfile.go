@@ -6,38 +6,30 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/sentinelos/tasker/internal/executor"
 	"github.com/zclconf/go-cty/cty"
 )
 
-const (
-	// BadIdentifierDetail A consistent detail message for all "not a valid identifier" diagnostics.
-	BadIdentifierDetail = "A name must start with a letter or underscore and may contain only letters, digits, underscores, and dashes."
-
-	// DefaultTimeout is used if there is no timeout given
-	DefaultTimeout = 10 * time.Minute
-)
-
-// LoadTaskfile is a wrapper around DecodeTaskfile that first reads the given filename from disk and parses.
-func LoadTaskfile(filename string, context *Context) (*Taskfile, hcl.Diagnostics) {
+// LoadTaskFile is a wrapper around DecodeTaskFile that first reads the given filename from disk and parses.
+func LoadTaskFile(filename string, context *executor.Context) (*TaskFile, hcl.Diagnostics) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, hcl.Diagnostics{{
 				Severity: hcl.DiagError,
-				Summary:  "Taskfile not found",
-				Detail:   fmt.Sprintf("The Taskfile %s does not exist.", filename),
+				Summary:  "Task file not found",
+				Detail:   fmt.Sprintf("The Task file %s does not exist.", filename),
 				Subject:  &hcl.Range{Filename: filename},
 			}}
 		}
 		return nil, hcl.Diagnostics{{
 			Severity: hcl.DiagError,
-			Summary:  "Failed to read Taskfile",
-			Detail:   fmt.Sprintf("The Taskfile %s could not be read, %s.", filename, err),
+			Summary:  "Failed to read Task file",
+			Detail:   fmt.Sprintf("The Task file %s could not be read, %s.", filename, err),
 			Subject:  &hcl.Range{Filename: filename},
 		}}
 	}
@@ -45,8 +37,8 @@ func LoadTaskfile(filename string, context *Context) (*Taskfile, hcl.Diagnostics
 	if len(src) == 0 {
 		return nil, hcl.Diagnostics{{
 			Severity: hcl.DiagError,
-			Summary:  "Empty Taskfile",
-			Detail:   fmt.Sprintf("The Taskfile %s is empty.", filename),
+			Summary:  "Empty Task file",
+			Detail:   fmt.Sprintf("The Task file %s is empty.", filename),
 			Subject:  &hcl.Range{Filename: filename},
 		}}
 	}
@@ -65,42 +57,46 @@ func LoadTaskfile(filename string, context *Context) (*Taskfile, hcl.Diagnostics
 	default:
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Unsupported Taskfile format",
-			Detail:   fmt.Sprintf("The Taskfile %s could not be read, unrecognized format suffix %s.", filename, suffix),
+			Summary:  "Unsupported Task file format",
+			Detail:   fmt.Sprintf("The Task file %s could not be read, unrecognized format suffix %s.", filename, suffix),
 			Subject:  &hcl.Range{Filename: filename},
 		})
 	}
 
 	if diags.HasErrors() {
-		return nil, diags
+		return &TaskFile{
+			Filename: filename,
+			Source:   file,
+		}, diags
 	}
 
-	return DecodeTaskfile(filename, file, context)
+	return DecodeTaskFile(filename, file, context)
 }
 
-// DecodeTaskfile decodes and evaluates expressions in the given Taskfile source code.
+// DecodeTaskFile decodes and evaluates expressions in the given TaskFile source code.
 //
-// The "filename" argument provides Taskfile filename
-// The "file" argument provides parsed Taskfile
+// The "filename" argument provides TaskFile filename
+// The "file" argument provides parsed TaskFile
 // The "context" argument provides variables and functions for use during expression evaluation.
-func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfile, hcl.Diagnostics) {
+func DecodeTaskFile(filename string, file *hcl.File, context *executor.Context) (*TaskFile, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	taskfile := &Taskfile{
-		Filename: filename,
-		Notifies: map[string]*Notify{},
-		Tasks:    map[string]*Task{},
+	taskFile := &TaskFile{
+		Filename:  filename,
+		Source:    file,
+		Notifiers: map[string]*Notifier{},
+		Tasks:     map[string]*Task{},
 	}
 
 	content, contentDiags := file.Body.Content(&hcl.BodySchema{
 		Attributes: []hcl.AttributeSchema{
 			{Name: "name", Required: true},
-			{Name: "description"},
+			{Name: "description", Required: true},
 			{Name: "runs_on", Required: true},
 		},
 		Blocks: []hcl.BlockHeaderSchema{
 			{Type: "variable", LabelNames: []string{"name"}},
-			{Type: "notify", LabelNames: []string{"name"}},
+			{Type: "notifier", LabelNames: []string{"name"}},
 			{Type: "task", LabelNames: []string{"name"}},
 		},
 	})
@@ -108,26 +104,26 @@ func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfil
 	diags = diags.Extend(contentDiags)
 
 	if attr, exists := content.Attributes["name"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskfile.Name))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskFile.Name))
 	}
 
 	if attr, exists := content.Attributes["description"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskfile.Description))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskFile.Description))
 	}
 
 	if attr, exists := content.Attributes["runs_on"]; exists {
-		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskfile.RunsOn))
+		diags = diags.Extend(gohcl.DecodeExpression(attr.Expr, nil, &taskFile.RunsOn))
 	}
 
 	variables := map[string]cty.Value{}
 	for _, block := range content.Blocks.OfType("variable") {
 		variable, varDiags := decodeVariableBlock(block, nil)
 		if varDiags.HasErrors() {
-			return taskfile, diags.Extend(varDiags)
+			return taskFile, diags.Extend(varDiags)
 		}
 
 		if _, found := variables[variable.Name]; found {
-			return taskfile, diags.Append(&hcl.Diagnostic{
+			return taskFile, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate variable",
 				Detail:   "Duplicate " + variable.Name + " variable definition found.",
@@ -142,33 +138,33 @@ func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfil
 	context.AddVariables(variables)
 
 	ctx := context.Ctx
-	for _, block := range content.Blocks.OfType("notify") {
-		notify, notifyDiags := decodeNotifyBlock(block, ctx)
-		if notifyDiags.HasErrors() {
-			return taskfile, diags.Extend(notifyDiags)
+	for _, block := range content.Blocks.OfType("notifier") {
+		notifier, notifierDiags := decodeNotifierBlock(block, ctx)
+		if notifierDiags.HasErrors() {
+			return taskFile, diags.Extend(notifierDiags)
 		}
 
-		if _, found := taskfile.Notifies[notify.Name]; found {
-			return taskfile, diags.Append(&hcl.Diagnostic{
+		if _, found := taskFile.Notifiers[notifier.Name]; found {
+			return taskFile, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  "Duplicate notify",
-				Detail:   "Duplicate " + notify.Name + " notify definition found.",
-				Subject:  &notify.DeclRange,
+				Summary:  "Duplicate notifier",
+				Detail:   "Duplicate " + notifier.Name + " notifier definition found.",
+				Subject:  &notifier.DeclRange,
 				Context:  block.DefRange.Ptr(),
 			})
 		}
 
-		taskfile.Notifies[notify.Name] = notify
+		taskFile.Notifiers[notifier.Name] = notifier
 	}
 
 	for _, block := range content.Blocks.OfType("task") {
 		task, taskDiags := decodeTaskBlock(block, ctx)
 		if taskDiags.HasErrors() {
-			return taskfile, diags.Extend(taskDiags)
+			return taskFile, diags.Extend(taskDiags)
 		}
 
-		if _, found := taskfile.Tasks[task.Name]; found {
-			return taskfile, diags.Append(&hcl.Diagnostic{
+		if _, found := taskFile.Tasks[task.Name]; found {
+			return taskFile, diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate task",
 				Detail:   "Duplicate " + task.Name + " task definition found.",
@@ -177,8 +173,8 @@ func DecodeTaskfile(filename string, file *hcl.File, context *Context) (*Taskfil
 			})
 		}
 
-		taskfile.Tasks[task.Name] = task
+		taskFile.Tasks[task.Name] = task
 	}
 
-	return taskfile, diags
+	return taskFile, diags
 }

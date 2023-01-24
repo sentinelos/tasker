@@ -1,20 +1,20 @@
 package diagnostic
 
 import (
+	"github.com/sentinelos/tasker/internal/constants"
 	"github.com/sentinelos/tasker/internal/diagnostic/logger"
 	loggerWriters "github.com/sentinelos/tasker/internal/diagnostic/logger/writers"
 	"github.com/sentinelos/tasker/internal/diagnostic/logger/writers/console"
+	"github.com/sentinelos/tasker/internal/diagnostic/metadata"
 	"github.com/sentinelos/tasker/internal/diagnostic/metrics"
 	metricsWriters "github.com/sentinelos/tasker/internal/diagnostic/metrics/writers"
 	"github.com/sentinelos/tasker/internal/diagnostic/metrics/writers/prometheus"
 )
 
-type Option func(o *Options)
-
 func NewOptions(opt ...Option) Options {
-	tags := hostTags()
+	labels := metadata.Get("host").Labels
 	opts := Options{
-		Severity:   logger.DefaultSeverity,
+		Severity:   constants.DefaultLoggerSeverity,
 		MetricsSet: metrics.NewSet(),
 	}
 
@@ -22,16 +22,17 @@ func NewOptions(opt ...Option) Options {
 		o(&opts)
 	}
 
-	tags["diagnostic"] = opts.Name
+	labels["diagnostic"] = opts.Name
+
 	opts.LoggerWriters = map[string]loggerWriters.Writer{
 		"console": console.NewConsole(console.NewOptions(
-			console.WithTags(tags),
+			console.WithLabels(labels),
 		)),
 	}
 
 	opts.MetricsWriters = map[string]metricsWriters.Writer{
 		"prometheus": prometheus.NewPrometheus(prometheus.NewOptions(
-			prometheus.WithTags(tags),
+			prometheus.WithLabels(labels),
 		)),
 	}
 

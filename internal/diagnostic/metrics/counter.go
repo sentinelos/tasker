@@ -8,8 +8,6 @@ import (
 	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 )
 
-type CounterLabels map[string]*Counter
-
 // Increment increment Counter value.
 func (c *Counter) Increment() {
 	c.Add(1)

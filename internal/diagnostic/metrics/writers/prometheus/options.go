@@ -4,8 +4,6 @@ import (
 	"github.com/sentinelos/tasker/internal/diagnostic/labels"
 )
 
-type Option func(o *Options)
-
 func NewOptions(opt ...Option) Options {
 	opts := Options{}
 
@@ -16,9 +14,9 @@ func NewOptions(opt ...Option) Options {
 	return opts
 }
 
-// WithTags set tags for the Prometheus writer
-func WithTags(tags labels.Labels) Option {
+// WithLabels set tags for the Prometheus writer
+func WithLabels(tags labels.Labels) Option {
 	return func(o *Options) {
-		o.Tags = tags
+		o.Labels = tags
 	}
 }

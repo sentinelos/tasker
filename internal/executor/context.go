@@ -1,4 +1,4 @@
-package taskfile
+package executor
 
 import (
 	"os"
@@ -13,56 +13,6 @@ import (
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
-type Status uint
-type ContainerStatus uint
-
-const (
-	StatusPending Status = iota
-	StatusSkipped
-	StatusRunning
-	StatusCancelled
-	StatusSuccess
-	StatusFailure
-)
-
-const (
-	ContainerStatusUnknown ContainerStatus = iota
-	ContainerStatusCreated
-	ContainerStatusRunning
-	ContainerStatusPausing
-	ContainerStatusPaused
-	ContainerStatusStopped
-	ContainerStatusExited
-)
-
-var (
-	StatusNames = map[Status]string{
-		StatusPending:   "pending",
-		StatusSkipped:   "skipped",
-		StatusRunning:   "running",
-		StatusCancelled: "cancelled",
-		StatusSuccess:   "success",
-		StatusFailure:   "failure",
-	}
-
-	ContainerStatusNames = map[ContainerStatus]string{
-		ContainerStatusUnknown: "unknown",
-		ContainerStatusCreated: "created",
-		ContainerStatusRunning: "running",
-		ContainerStatusPausing: "pausing",
-		ContainerStatusPaused:  "paused",
-		ContainerStatusStopped: "stopped",
-		ContainerStatusExited:  "exited",
-	}
-
-	DefaultStatus          = StatusPending
-	DefaultContainerStatus = ContainerStatusUnknown
-)
-
-type Context struct {
-	Ctx *hcl.EvalContext
-}
-
 func NewContext() *Context {
 	id := uuid.New().String()
 	workdir, _ := os.Getwd()
@@ -75,7 +25,7 @@ func NewContext() *Context {
 	}
 
 	context.AddStringVariable("run_id", id)
-	context.AddObjectVariable("runner", RunnerContext{
+	context.AddObjectVariable("executor", RunnerContext{
 		Name:    "local",
 		OS:      runtime.GOOS,
 		Arch:    runtime.GOARCH,
@@ -134,7 +84,7 @@ func (c *Context) AddVariables(v map[string]cty.Value) {
 }
 
 func (c *Context) AddRunner(v RunnerContext) {
-	c.AddObjectVariable("runner", v)
+	c.AddObjectVariable("executor", v)
 }
 
 type RunnerContext struct {

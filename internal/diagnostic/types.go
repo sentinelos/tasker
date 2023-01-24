@@ -7,16 +7,20 @@ import (
 	metricsWriters "github.com/sentinelos/tasker/internal/diagnostic/metrics/writers"
 )
 
-// Diagnostic is a list of Diagnostic instances.
-type Diagnostic struct {
-	Options
-}
+type (
+	// Diagnostic is a list of Diagnostic instances.
+	Diagnostic struct {
+		Options
+	}
 
-type Options struct {
-	Name           string
-	Description    string
-	Severity       logger.Severity
-	LoggerWriters  map[string]loggerWriters.Writer
-	MetricsWriters map[string]metricsWriters.Writer
-	MetricsSet     *metrics.Set
-}
+	Options struct {
+		Name           string
+		Description    string
+		Severity       logger.Severity
+		LoggerWriters  map[string]loggerWriters.Writer
+		MetricsWriters map[string]metricsWriters.Writer
+		MetricsSet     *metrics.Set
+	}
+
+	Option func(o *Options)
+)

@@ -12,7 +12,7 @@ var (
 
 func validateMetric(s string) error {
 	if len(s) == 0 {
-		return fmt.Errorf("getOrCreate name cannot be empty")
+		return fmt.Errorf("metric name cannot be empty")
 	}
 	n := strings.IndexByte(s, '{')
 	if n < 0 {

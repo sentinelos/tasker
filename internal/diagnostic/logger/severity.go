@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-// Severity  represents the severity of a diagnostic.
-type Severity uint
-
 const (
 	Invalid Severity = iota
 	Trace

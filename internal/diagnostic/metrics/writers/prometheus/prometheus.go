@@ -13,7 +13,7 @@ func NewPrometheus(o Options) *Prometheus {
 }
 
 func (p *Prometheus) Write(writer io.Writer, set *metrics.Set) {
-	tags := p.Tags.String()
+	labels := p.Labels.String()
 
 	for _, metric := range set.Metrics {
 		fmt.Fprintf(writer, "# HELP %s %s\n", metric.Name, metric.Description)
@@ -21,9 +21,9 @@ func (p *Prometheus) Write(writer io.Writer, set *metrics.Set) {
 
 		for label, met := range metric.Labels.Values() {
 			if len(label) > 0 {
-				fmt.Fprintf(writer, "%s{%s,%s} ", metric.Name, tags, label)
+				fmt.Fprintf(writer, "%s{%s,%s} ", metric.Name, labels, label)
 			} else {
-				fmt.Fprintf(writer, "%s{%s} ", metric.Name, tags)
+				fmt.Fprintf(writer, "%s{%s} ", metric.Name, labels)
 			}
 			met.Write(writer)
 			fmt.Fprintf(writer, "\n")

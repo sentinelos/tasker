@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/sentinelos/tasker/internal/constants"
 )
 
 // decodeStepBlock validates each part of the step block, building out a defined *Step
@@ -37,7 +38,7 @@ func decodeStepBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Step, hcl.Diagnos
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid step name",
-			Detail:   BadIdentifierDetail,
+			Detail:   constants.BadIdentifierDetail,
 			Subject:  &block.LabelRanges[0],
 		})
 	}
@@ -86,12 +87,12 @@ func decodeStepBlock(block *hcl.Block, ctx *hcl.EvalContext) (*Step, hcl.Diagnos
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagWarning,
 					Summary:  "Invalid timeout",
-					Detail:   fmt.Sprintf("Invalid timeout '%s', using default of %s", timeout, DefaultTimeout),
+					Detail:   fmt.Sprintf("Invalid timeout '%s', using default of %s", timeout, constants.DefaultTimeout),
 					Subject:  attr.Expr.StartRange().Ptr(),
 					Context:  attr.Expr.Range().Ptr(),
 				})
 
-				step.Timeout = DefaultTimeout
+				step.Timeout = constants.DefaultTimeout
 			} else {
 				step.Timeout = d
 			}

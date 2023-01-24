@@ -7,7 +7,9 @@ import (
 	"github.com/sentinelos/tasker/internal/diagnostic/metrics"
 )
 
-// Writer defines a logger writers interface.
-type Writer interface {
-	Write(io.Writer, *metrics.Set)
-}
+type (
+	// Writer defines a logger writers interface.
+	Writer interface {
+		Write(io.Writer, *metrics.Set)
+	}
+)
