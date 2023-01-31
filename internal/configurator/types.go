@@ -13,11 +13,13 @@ type (
 
 	RunOn struct {
 		Name         string            `yaml:"name" hcl:"name"`
-		Image        string            `json:"image" hcl:"image"`
+		Type         string            `yaml:"type" hcl:"type"`
 		Description  string            `yaml:"description" hcl:"description,optional"`
 		Environments map[string]string `yaml:"environments" hcl:"environments,optional"`
-		Cpu          uint8             `json:"cpu" hcl:"cpu,optional"`
-		Memory       string            `json:"memory" hcl:"memory,optional"`
+		Image        string            `json:"image" hcl:"image"`
+		Labels       map[string]string `yaml:"labels" hcl:"labels,optional"`
+		Cpu          int64             `json:"cpu" hcl:"cpu,optional"`
+		Memory       int64             `json:"memory" hcl:"memory,optional"`
 		Platform     string            `json:"platform" hcl:"platform,optional"`
 		User         string            `json:"user" hcl:"user,optional"`
 		Shell        string            `json:"shell" hcl:"shell"`

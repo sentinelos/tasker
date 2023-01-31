@@ -10,6 +10,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.12
 	github.com/spf13/cobra v1.6.1
 	github.com/zclconf/go-cty v1.12.1
+	golang.org/x/exp v0.0.0-20230129154200-a960b3787bd2
 )
 
 require (

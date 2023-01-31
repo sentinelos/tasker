@@ -84,7 +84,7 @@ func DecodeConfigFile(filename string, file *hcl.File) (*ConfigFile, hcl.Diagnos
 
 	content, contentDiags := file.Body.Content(&hcl.BodySchema{
 		Blocks: []hcl.BlockHeaderSchema{
-			{Type: "run_on", LabelNames: []string{"name", "image"}},
+			{Type: "run_on", LabelNames: []string{"name", "type"}},
 		},
 	})
 
